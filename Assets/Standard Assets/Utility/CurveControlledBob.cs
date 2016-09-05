@@ -35,6 +35,7 @@ namespace UnityStandardAssets.Utility
         {
             float xPos = m_OriginalCameraPosition.x + (Bobcurve.Evaluate(m_CyclePositionX)*HorizontalBobRange);
             float yPos = m_OriginalCameraPosition.y + (Bobcurve.Evaluate(m_CyclePositionY)*VerticalBobRange);
+            float zPos = m_OriginalCameraPosition.z;
 
             m_CyclePositionX += (speed*Time.deltaTime)/m_BobBaseInterval;
             m_CyclePositionY += ((speed*Time.deltaTime)/m_BobBaseInterval)*VerticaltoHorizontalRatio;
@@ -48,7 +49,7 @@ namespace UnityStandardAssets.Utility
                 m_CyclePositionY = m_CyclePositionY - m_Time;
             }
 
-            return new Vector3(xPos, yPos, 0f);
+            return new Vector3(xPos, yPos, zPos);
         }
     }
 }
