@@ -536,7 +536,13 @@ PlayerSettings:
   XboxOne::VR::enabledDevices: []
   iOS::VR::enabledDevices: []
   tvOS::VR::enabledDevices: []
+<<<<<<< HEAD
   cloudProjectId: bf516f66-062b-4e31-9d28-475e29984781
   projectName: flee or face
   organizationId: yeosong
+=======
+  cloudProjectId: 
+  projectName: 
+  organizationId: 
+>>>>>>> dbed8b026da0ba9e3dd57201125a2f9cc0b454fb
   cloudEnabled: 0
