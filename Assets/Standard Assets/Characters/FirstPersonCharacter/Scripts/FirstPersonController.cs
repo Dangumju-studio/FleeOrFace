@@ -43,6 +43,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
+        private Animator m_Animator;
 
         // Use this for initialization
         private void Start()
@@ -57,6 +58,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera_wrapper.transform);
+            m_Animator = GetComponent<Animator>();
            
         }
 
@@ -208,6 +210,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             // Read input
             float horizontal = CrossPlatformInputManager.GetAxis("Horizontal");
             float vertical = CrossPlatformInputManager.GetAxis("Vertical");
+            float attack = CrossPlatformInputManager.GetAxis("Fire1");
 
             bool waswalking = m_IsWalking;
 
@@ -235,6 +238,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 StopAllCoroutines();
                 StartCoroutine(!m_IsWalking ? m_FovKick.FOVKickUp() : m_FovKick.FOVKickDown());
             }
+
+            UpdateAnimator(m_Input, speed, attack);
         }
 
 
@@ -260,6 +265,30 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 return;
             }
             body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
+        }
+
+        bool Attacked = false;
+        public void UpdateAnimator(Vector2 input, float speed, float attack)
+        {
+            m_Animator.SetFloat("Forward", input.y * speed, 0.1f, Time.deltaTime);
+            m_Animator.SetFloat("Side", input.x * speed, 0.1f, Time.deltaTime);
+            if (attack > 0)
+            {
+                if (!Attacked)
+                {
+                    Attacked = true;
+                    float m_atkMotion = Random.Range(0, 1f);
+                    m_Animator.SetFloat("AttackMotion", m_atkMotion);
+                    m_Animator.SetBool("OnAttack", true);
+                }
+                else m_Animator.SetBool("OnAttack", false);
+            }
+            else
+            {
+                m_Animator.SetBool("OnAttack", false);
+                Attacked = false;
+            }
+            m_Animator.SetBool("OnGround", m_CharacterController.isGrounded);
         }
     }
 }
