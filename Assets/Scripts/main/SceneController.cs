@@ -15,6 +15,7 @@ public class SceneController : MonoBehaviour {
             m_fpsCtrl.m_UseHeadBob = false;
             m_PlayerCamera.transform.localPosition = new Vector3(0, 2, -2.5f);
             m_PlayerCamera.transform.localRotation = Quaternion.Euler(30, 0, 0);
+            
         }
 
     }
