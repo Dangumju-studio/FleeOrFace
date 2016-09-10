@@ -283,7 +283,7 @@ Material:
       second: {r: 1, g: 1, b: 0, a: 0}
     - first:
         name: _ReflectionColor
-      second: {r: 0.5794164, g: 0.6849238, b: 0.76119405, a: 0.43137255}
+      second: {r: 0.43020114, g: 0.49205282, b: 0.53676474, a: 0.43137255}
     - first:
         name: _ReflectionTex_ST
       second: {r: 1, g: 1, b: 0, a: 0}
