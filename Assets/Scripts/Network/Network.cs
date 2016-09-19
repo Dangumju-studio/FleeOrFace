@@ -9,12 +9,33 @@ using System.Collections.Generic;
 public enum NetCommand
     {
         Null,
-        Connect,    //Similar to SYN
+        /// <summary>
+        /// Connect request message (SYN)
+        /// </summary>
+        Connect,
+        /// <summary>
+        /// Disconnect request message
+        /// </summary>
         Disconnect,
-        Check,      //Similar to ACK
+        /// <summary>
+        /// Server connection check message (ACK)
+        /// </summary>
+        Check,      
+        /// <summary>
+        /// Chat message
+        /// </summary>
         Chat,
+        /// <summary>
+        /// Ready message in player waiting room
+        /// </summary>
         Ready,
+        /// <summary>
+        /// Every player's position data
+        /// </summary>
         Position,
+        /// <summary>
+        /// Some player's attack flag data
+        /// </summary>
         Attack
     }
 

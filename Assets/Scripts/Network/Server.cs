@@ -14,7 +14,7 @@ public class Server : MonoBehaviour {
     List<ClientInfo> clients = new List<ClientInfo>();
     byte[] bData = new byte[1024];
 
-	public void startServer(int port = 9210)
+	public void StartServer(int port = 9210)
     {
         try
         {
@@ -67,7 +67,7 @@ public class Server : MonoBehaviour {
         }
         catch(Exception ex)
         {
-            print(e.Message);
+            print(ex.Message);
         }
     }
 
