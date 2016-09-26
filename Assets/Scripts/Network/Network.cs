@@ -59,18 +59,18 @@ public class Network : MonoBehaviour {
         public Data(byte[] data)
         {
             cmd = (NetCommand)BitConverter.ToInt32(data, 0); //
-            int nameLen = BitConverter.ToInt32(data, 2);    //
-            int msgLen = BitConverter.ToInt32(data, 4);     //
+            int nameLen = BitConverter.ToInt32(data, 4);    //
+            int msgLen = BitConverter.ToInt32(data, 8);     //
 
             //get name
             if (nameLen > 0)
-                name = Encoding.UTF8.GetString(data, 6, nameLen);
+                name = Encoding.UTF8.GetString(data, 12, nameLen);
             else
                 name = string.Empty;
 
             //get message
             if (msgLen > 0)
-                msg = Encoding.UTF8.GetString(data, 3 + nameLen, msgLen);
+                msg = Encoding.UTF8.GetString(data, 12 + nameLen, msgLen);
             else
                 msg = string.Empty;
         }
@@ -99,6 +99,13 @@ public class Network : MonoBehaviour {
             //return bytes array
             return res.ToArray();
         }
+    }
+
+    public void Start()
+    {
+
+        //Make this object immortal
+        DontDestroyOnLoad(this);
     }
 
 }

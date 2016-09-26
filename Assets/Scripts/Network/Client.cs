@@ -64,7 +64,7 @@ public class Client : MonoBehaviour {
 
                     break;
                 case NetCommand.Chat:
-
+                    
                     break;
                 case NetCommand.Ready:
 
