@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Collections.Generic;
 using System;
+using System.Text;
 
 public class Server : MonoBehaviour {
 
@@ -34,29 +35,111 @@ public class Server : MonoBehaviour {
 
     }
 
+    public void CloseServer()
+    {
+        udpServer.Disconnect(false);
+        udpServer.Close();
+        udpServer.Dispose();
+        udpServer = null;
+    }
+
     private void OnReceive(IAsyncResult ar)
     {
-        try
-        {
+        //try
+        //{
             EndPoint epSender = new IPEndPoint(IPAddress.Any, 0);
             udpServer.EndReceiveFrom(ar, ref epSender);
 
             //receive
-            Network.Data dataReceived = new Network.Data(bData);
+            NetworkData dataReceived = new NetworkData(bData);
 
             //response
-            Network.Data dataToSend = new Network.Data();
+            NetworkData dataToSend = new NetworkData();
 
             //set response data
             dataToSend.name = dataReceived.name;
+            dataToSend.cmd = dataReceived.cmd;
+            dataToSend.identify = dataReceived.identify;
+            byte[] msg = dataToSend.ConvertToByte();
+            ClientInfo cInfo;
 
-            //send code :
-            //serverSocket.BeginSendTo(message, 0, message.Length, SocketFlags.None, clientInfo.endpoint, new AsyncCallback(OnSend), clientInfo.endpoint);
-        }
-        catch(Exception ex)
-        {
-            print(ex.Message);
-        }
+            switch (dataReceived.cmd)
+            {
+                case NetCommand.Connect:
+                    //add player
+                    cInfo = new ClientInfo();
+                    cInfo.ep = epSender;
+                    cInfo.name = dataReceived.name;
+                    cInfo.identification = dataReceived.identify;
+                    clients.Add(cInfo);
+                    udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, epSender, new AsyncCallback(OnSend), epSender);
+                    //send every player to this player's connection state
+                    foreach (ClientInfo c in clients)
+                        udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                    break;
+
+                case NetCommand.Disconnect:
+                    //remove player
+                    clients.Remove(clients.Find(c => c.ep == epSender));
+                    //send every player to this player's connection state
+                    foreach (ClientInfo c in clients)
+                        udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                    break;
+
+                case NetCommand.Check:
+                    //update lastcheck time
+                    cInfo = clients.Find(c => c.ep == epSender);
+                    cInfo.lastCheck = DateTime.Now;
+                    dataToSend.msg = "";
+                    //Ready to send clients list.
+                    StringBuilder sb = new StringBuilder();
+                    foreach (ClientInfo c in clients)
+                        sb.AppendFormat("{0},", c.name);
+                    dataToSend.msg = sb.ToString();
+                    //convert data to byte
+                    msg = dataToSend.ConvertToByte();
+                    udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, epSender, new AsyncCallback(OnSend), epSender);
+                    break;
+
+                case NetCommand.Chat:
+                    //send every player to chat message
+                    foreach(ClientInfo c in clients)
+                        udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                    break;
+
+                case NetCommand.Ready:
+                    //update ready state
+                    cInfo = clients.Find(c => c.ep == epSender);
+                    cInfo.isReady = bool.Parse(dataReceived.msg);
+                    //send every player to this player's ready state
+                    foreach (ClientInfo c in clients)
+                        udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                    break;
+
+                case NetCommand.Attack:
+                    foreach (ClientInfo c in clients)
+                    {
+                        udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                    }
+                    break;
+
+                case NetCommand.PositionRotation:
+                    foreach (ClientInfo c in clients)
+                    {
+                        udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                    }
+                    break;
+            }
+
+            udpServer.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epSender, new AsyncCallback(OnReceive), epSender);
+
+        //send code :
+        //serverSocket.BeginSendTo(message, 0, message.Length, SocketFlags.None, clientInfo.endpoint, new AsyncCallback(OnSend), clientInfo.endpoint);
+        //}
+        //catch(Exception ex)
+        //{
+        //    print(ex.Message);
+        //}
     }
 
     private void OnSend(IAsyncResult ar)
@@ -71,9 +154,4 @@ public class Server : MonoBehaviour {
         }
     }
 
-    class ClientInfo
-    {
-        IPEndPoint ep;
-        string name;
-    }
 }

@@ -18,7 +18,7 @@ public enum NetCommand
         /// </summary>
         Disconnect,
         /// <summary>
-        /// Server connection check message (ACK)
+        /// Server connection check message (ACK), Get ClientList(Only name)
         /// </summary>
         Check,      
         /// <summary>
@@ -30,82 +30,135 @@ public enum NetCommand
         /// </summary>
         Ready,
         /// <summary>
-        /// Every player's position data
+        /// Player's position/rotation data
         /// </summary>
-        Position,
+        PositionRotation,
         /// <summary>
         /// Some player's attack flag data
         /// </summary>
         Attack
     }
 
-public class Network : MonoBehaviour {
-    
+
+/// <summary>
+/// Data class
+/// </summary>
+public class NetworkData
+{
+    public NetCommand cmd;
+    public string msg;
+    public string name;
     /// <summary>
-    /// Data class
+    /// Endpoint for identify
     /// </summary>
-    public class Data
-    {
-        public NetCommand cmd;
-        public string msg;
-        public string name;
+    public string identify;
 
-        public Data()
-        {
-            cmd = NetCommand.Null;
+    public NetworkData()
+    {
+        cmd = NetCommand.Null;
+        msg = string.Empty;
+        name = string.Empty;
+        identify = null;
+    }
+    public NetworkData(byte[] data)
+    {
+        cmd = (NetCommand)BitConverter.ToInt32(data, 0); 
+        int nameLen = BitConverter.ToInt32(data, 4);
+        int identifyLen = BitConverter.ToInt32(data, 8);
+        int msgLen = BitConverter.ToInt32(data, 12);
+        
+        //get name
+        name = Encoding.UTF8.GetString(data, 16, nameLen);
+
+        //get identification
+        identify = Encoding.UTF8.GetString(data, 16 + nameLen, identifyLen);
+
+        //get message
+        if (msgLen > 0)
+            msg = Encoding.UTF8.GetString(data, 16 + nameLen + identifyLen, msgLen);
+        else
             msg = string.Empty;
-            name = string.Empty;
-        }
-        public Data(byte[] data)
-        {
-            cmd = (NetCommand)BitConverter.ToInt32(data, 0); //
-            int nameLen = BitConverter.ToInt32(data, 4);    //
-            int msgLen = BitConverter.ToInt32(data, 8);     //
-
-            //get name
-            if (nameLen > 0)
-                name = Encoding.UTF8.GetString(data, 12, nameLen);
-            else
-                name = string.Empty;
-
-            //get message
-            if (msgLen > 0)
-                msg = Encoding.UTF8.GetString(data, 12 + nameLen, msgLen);
-            else
-                msg = string.Empty;
-        }
-
-        /// <summary>
-        /// Convert Data Object to bytes array.
-        /// </summary>
-        /// <returns></returns>
-        public byte[] ConvertToByte()
-        {
-            List<byte> res = new List<byte>();
-
-            //0 : command
-            res.AddRange(BitConverter.GetBytes((short)cmd));
-
-            //1 : name length
-            res.AddRange(BitConverter.GetBytes((short)name.Length));
-
-            //2, 3 : msg length
-            res.AddRange(BitConverter.GetBytes((short)msg.Length));
-
-            //4~ : name, message
-            res.AddRange(Encoding.UTF8.GetBytes(name));
-            res.AddRange(Encoding.UTF8.GetBytes(msg));
-
-            //return bytes array
-            return res.ToArray();
-        }
     }
 
-    public void Start()
+    /// <summary>
+    /// Convert Data Object to bytes array.
+    /// </summary>
+    /// <returns></returns>
+    public byte[] ConvertToByte()
     {
+        List<byte> res = new List<byte>();
 
-        //Make this object immortal
-        DontDestroyOnLoad(this);
+        //0 : command
+        res.AddRange(BitConverter.GetBytes((int)cmd));
+
+        //1 : name length
+        res.AddRange(BitConverter.GetBytes(name.Length));
+
+        //2 : identification length
+        res.AddRange(BitConverter.GetBytes(identify.Length));
+
+        //3, 4 : msg length
+        res.AddRange(BitConverter.GetBytes(msg.Length));
+
+        //5~ : name, identification, message
+        res.AddRange(Encoding.UTF8.GetBytes(name));
+        res.AddRange(Encoding.UTF8.GetBytes(identify));
+        if(msg != null) res.AddRange(Encoding.UTF8.GetBytes(msg));
+
+        //return bytes array
+        return res.ToArray();
     }
+} 
 
+public class ClientInfo
+{
+    /// <summary>
+    /// End Point
+    /// </summary>
+    public EndPoint ep;
+    /// <summary>
+    /// Client Name
+    /// </summary>
+    public string name;
+    /// <summary>
+    /// Identification string
+    /// </summary>
+    public string identification;
+    /// <summary>
+    /// Last client connection checked time
+    /// </summary>
+    public DateTime lastCheck;
+
+    /// <summary>
+    /// Ready state
+    /// </summary>
+    public bool isReady;
+
+    /// <summary>
+    /// User character position
+    /// </summary>
+    public Vector3 userPosition;
+    /// <summary>
+    /// User character rotation
+    /// </summary>
+    public Quaternion userRotation;
+    /// <summary>
+    /// 0 : Dead, 1 : Zombie, 2 : Human, -1 : Not in game
+    /// </summary>
+    public int userState;
+
+    /// <summary>
+    /// Client Information Class
+    /// </summary>
+    public ClientInfo()
+    {
+        //initialize client information
+        ep = null;
+        name = "";
+        lastCheck = DateTime.Now;
+        isReady = false;
+        userPosition = Vector3.zero;
+        userRotation = Quaternion.identity;
+        userState = -1;
+    }
 }
