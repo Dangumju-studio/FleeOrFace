@@ -16,8 +16,11 @@ public class MenuController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        //Assign client and server
         client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
         server = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Server>();
+
+        Application.runInBackground = true;
     }
 	
 	// Update is called once per frame
@@ -30,7 +33,7 @@ public class MenuController : MonoBehaviour {
         if (txtName.text.Length > 0)
         {
             client.playerName = txtName.text;
-            //generate identification string
+            //Generate identification string
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             for(int i=0; i<6; i++)
             {
@@ -38,6 +41,7 @@ public class MenuController : MonoBehaviour {
                 sb.Append(cRandom[Random.Range(0, cRandom.Length)]);    
             }
             client.identification = sb.ToString();
+            //Move next
             pnTypeName.SetActive(false);
             pnSelectHostMode.SetActive(true);
         }
@@ -47,7 +51,7 @@ public class MenuController : MonoBehaviour {
     public void btnBeHost()
     {
         server.StartServer();
-        client.ConnectToServer("127.0.0.1");
+        client.hostIP = "127.0.0.1";
         SceneManager.LoadScene("room");
     }
     public void btnConnectHost()
@@ -68,7 +72,7 @@ public class MenuController : MonoBehaviour {
             System.Net.IPAddress tmp;
             if (System.Net.IPAddress.TryParse(txtHostIP.text, out tmp))
             {
-                client.ConnectToServer(txtHostIP.text);
+                client.hostIP = txtHostIP.text;
                 SceneManager.LoadScene("room");
             }
         }

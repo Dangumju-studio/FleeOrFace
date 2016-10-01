@@ -12,6 +12,7 @@ public class Client : MonoBehaviour {
     public EndPoint epServer;
     public string playerName = "Player";
     public string identification = "";
+    public string hostIP = "";
     public bool isConnected = false;
 
     /// <summary>
@@ -22,15 +23,14 @@ public class Client : MonoBehaviour {
     /// <summary>
     /// Chatting text component. Defferent component between ingame and waiting room.
     /// </summary>
-    public Text txtChat;
-    StringBuilder sbChat = new StringBuilder();
+    public Queue<string> txtChatQueue;
 
     byte[] bData = new byte[1024];
 
     public void ConnectToServer(string ip, int port = 9210)
     {
-        //try
-        //{
+        try
+        {
             //udp socket initialize
             client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
@@ -51,11 +51,11 @@ public class Client : MonoBehaviour {
             //Receive data from server asynchronously
             bData = new byte[1024];
             client.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epServer, new AsyncCallback(OnReceive), null);
-        //}
-        //catch (Exception ex)
-        //{
-        //    print(ex.Message);
-        //}
+        }
+        catch (Exception ex)
+        {
+            print(ex.Message);
+        }
     }
 
     private void OnReceive(IAsyncResult ar)
@@ -78,8 +78,10 @@ public class Client : MonoBehaviour {
                         cInfo = new ClientInfo();
                         cInfo.name = msgReceived.name;
                         clients.Add(cInfo);
-                        txtChat.text += string.Format("{0} Entered!\n", msgReceived.name);
                     }
+                    print(msgReceived.name + " Entered");
+                    txtChatQueue.Enqueue(string.Format("{0} Entered!", msgReceived.name));
+
                     break;
 
                 case NetCommand.Disconnect:
@@ -89,7 +91,7 @@ public class Client : MonoBehaviour {
                     {
                         //Disconnect someone
                         clients.Remove(clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify));
-                        txtChat.text += string.Format("{0} Leave..\n", msgReceived.name);
+                        txtChatQueue.Enqueue(string.Format("{0} Leave..", msgReceived.name));
                     }
                     break;
 
@@ -100,15 +102,8 @@ public class Client : MonoBehaviour {
                     break;
 
                 case NetCommand.Chat:
-                    sbChat.AppendLine(msgReceived.msg);
-                    //find newline character
-                    int cntNewline = 0;
-                    foreach (char c in sbChat.ToString())
-                        if (c == '\n') cntNewline += 1;
-                    if(cntNewline > 50) //Max chat line = 50
-                        //cut off old message
-                        sbChat.Remove(0, sbChat.ToString().IndexOf('\n'));
-                    txtChat.text = sbChat.ToString();
+                    print(msgReceived.msg);
+                    txtChatQueue.Enqueue(msgReceived.name + ":" + msgReceived.msg);
                     break;
 
                 case NetCommand.Ready:
@@ -124,6 +119,10 @@ public class Client : MonoBehaviour {
 
                     break;
             }
+
+            //Continue receiving
+            bData = new byte[1024];
+            client.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epServer, new AsyncCallback(OnReceive), null);
 
         }
         catch (Exception ex)
@@ -164,9 +163,23 @@ public class Client : MonoBehaviour {
     {
         NetworkData newMessage = new NetworkData();
         newMessage.name = playerName;
+        newMessage.identify = identification;
         newMessage.cmd = cmd;
         newMessage.msg = msg;
         byte[] bData = newMessage.ConvertToByte();
-        client.BeginSendTo(bData, 0, bData.Length, SocketFlags.None, epServer, new AsyncCallback(OnReceive), epServer);
+        client.BeginSendTo(bData, 0, bData.Length, SocketFlags.None, epServer, new AsyncCallback(OnSend), null);
+    }
+
+    /// <summary>
+    /// Send check message every 5 seconds to confirm connection.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator sendCheck()
+    {
+        while(isConnected)
+        {
+            yield return new WaitForSeconds(5f);
+            SendData(NetCommand.Check, "");
+        }
     }
 }

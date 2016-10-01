@@ -60,6 +60,10 @@ public class NetworkData
         name = string.Empty;
         identify = null;
     }
+    /// <summary>
+    /// Initialize NetworkData from byte array
+    /// </summary>
+    /// <param name="data">Byte array data</param>
     public NetworkData(byte[] data)
     {
         cmd = (NetCommand)BitConverter.ToInt32(data, 0); 
@@ -67,15 +71,15 @@ public class NetworkData
         int identifyLen = BitConverter.ToInt32(data, 8);
         int msgLen = BitConverter.ToInt32(data, 12);
         
-        //get name
-        name = Encoding.UTF8.GetString(data, 16, nameLen);
+        //get name (convert from base64 to restore utf8 string)
+        name = Encoding.UTF8.GetString(Convert.FromBase64String(Encoding.UTF8.GetString(data, 16, nameLen)));
 
         //get identification
         identify = Encoding.UTF8.GetString(data, 16 + nameLen, identifyLen);
 
         //get message
         if (msgLen > 0)
-            msg = Encoding.UTF8.GetString(data, 16 + nameLen + identifyLen, msgLen);
+            msg = Encoding.UTF8.GetString(Convert.FromBase64String(Encoding.UTF8.GetString(data, 16 + nameLen + identifyLen, msgLen)));
         else
             msg = string.Empty;
     }
@@ -83,10 +87,13 @@ public class NetworkData
     /// <summary>
     /// Convert Data Object to bytes array.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Converted Data</returns>
     public byte[] ConvertToByte()
     {
         List<byte> res = new List<byte>();
+        //Convert utf8 string(name, msg) to base64.
+        name = Convert.ToBase64String(Encoding.UTF8.GetBytes(name));
+        msg = Convert.ToBase64String(Encoding.UTF8.GetBytes(msg));
 
         //0 : command
         res.AddRange(BitConverter.GetBytes((int)cmd));
@@ -110,6 +117,9 @@ public class NetworkData
     }
 } 
 
+/// <summary>
+/// Client Information class
+/// </summary>
 public class ClientInfo
 {
     /// <summary>
