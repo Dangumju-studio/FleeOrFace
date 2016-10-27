@@ -171,4 +171,16 @@ public class ClientInfo
         userRotation = Quaternion.identity;
         userState = -1;
     }
+    public ClientInfo(string name, string identification, bool isReady = false)
+    {
+        //initialize client information
+        ep = null;
+        this.name = name;
+        this.identification = identification;
+        lastCheck = DateTime.Now;
+        this.isReady = isReady;
+        userPosition = Vector3.zero;
+        userRotation = Quaternion.identity;
+        userState = -1;
+    }
 }

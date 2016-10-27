@@ -486,8 +486,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 669508136}
   m_HandleRect: {fileID: 669508135}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.80200005
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1565,8 +1565,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 816007763}
   m_HandleRect: {fileID: 816007762}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.702
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1637,7 +1637,7 @@ RectTransform:
   m_RootOrder: 0
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 300.00003}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &1146844149
@@ -1812,9 +1812,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8dd783c09a748641abace6b03f2b520, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myPlayerName: {fileID: 636302462}
   txtChatMessage: {fileID: 2114060120}
+  scrChat: {fileID: 269050656}
   txtChatInput: {fileID: 1146844151}
   btnReady: {fileID: 685954772}
+  playerInfoPrefab: {fileID: 1000013806321850, guid: 6aac2f09b3f2e0d478433c12dfb4e059,
+    type: 2}
+  playerInfoWrapper: {fileID: 1952737636}
 --- !u!4 &1173852814
 Transform:
   m_ObjectHideFlags: 0
@@ -2308,8 +2313,8 @@ RectTransform:
   m_RootOrder: 0
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 300}
+  m_AnchoredPosition: {x: 0, y: 50}
+  m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &1976189803
 GameObject:
@@ -2888,10 +2893,10 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
+    m_FontSize: 15
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 1
     m_MaxSize: 40
     m_Alignment: 0
     m_AlignByGeometry: 0

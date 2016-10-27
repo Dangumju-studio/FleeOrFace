@@ -11,22 +11,28 @@ public class Client : MonoBehaviour {
     public Socket client;
     public EndPoint epServer;
     public string playerName = "Player";
-    public string identification = "";
+    public string identification = "";  //assigned in MenuController (after Player name input)
     public string hostIP = "";
     public bool isConnected = false;
 
     /// <summary>
     /// Every client's information list. Except this client.
     /// </summary>
-    List<ClientInfo> clients = new List<ClientInfo>();
+    public List<ClientInfo> clients = new List<ClientInfo>();
 
     /// <summary>
-    /// Chatting text component. Defferent component between ingame and waiting room.
+    /// Chatting text queue.
+    /// Every chatting message is pushed into txtChatQueue. Textbox in game or room refers this object to display chatting message.
     /// </summary>
-    public Queue<string> txtChatQueue;
+    public Queue<string> txtChatQueue = new Queue<string>();
 
     byte[] bData = new byte[1024];
 
+    /// <summary>
+    /// Connect server method
+    /// </summary>
+    /// <param name="ip">Host's IP address</param>
+    /// <param name="port">Host's port number. default = 9210</param>
     public void ConnectToServer(string ip, int port = 9210)
     {
         try
@@ -48,7 +54,7 @@ public class Client : MonoBehaviour {
             //Connect to server
             client.BeginSendTo(bData, 0, bData.Length, SocketFlags.None, epServer, new AsyncCallback(OnSend), null);
 
-            //Receive data from server asynchronously
+            //Receive data from server asynchronously, and save the received data into Client.bData
             bData = new byte[1024];
             client.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epServer, new AsyncCallback(OnReceive), null);
         }
@@ -58,6 +64,11 @@ public class Client : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Called when any data has arrived.
+    /// Received data is in 'Client.bData'(Global variable).
+    /// </summary>
+    /// <param name="ar"></param>
     private void OnReceive(IAsyncResult ar)
     {
         try
@@ -74,9 +85,12 @@ public class Client : MonoBehaviour {
                     if(msgReceived.name == playerName && msgReceived.identify == identification)
                     {
                         isConnected = true;
+                        SendData(NetCommand.Check, "");
                     } else {
                         cInfo = new ClientInfo();
                         cInfo.name = msgReceived.name;
+                        cInfo.identification = msgReceived.identify;
+                        cInfo.lastCheck = DateTime.Now;
                         clients.Add(cInfo);
                     }
                     print(msgReceived.name + " Entered");
@@ -96,13 +110,37 @@ public class Client : MonoBehaviour {
                     break;
 
                 case NetCommand.Check:
-                    //Check success, Get ClientList
+                    //Check success, Modify ClientList(clients)
                     string[] players = msgReceived.msg.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach(string s in players)
+                    {
+                        string[] pStr = s.Split(new char[] { ':' });
+                        ClientInfo ci = clients.Find(c => c.name.Equals(pStr[0]) && c.identification.Equals(pStr[1]));
+                        if (ci != null)
+                        {
+                            //modify
+                            ci.isReady = bool.Parse(pStr[2]);
+                            ci.lastCheck = DateTime.Now;
+                        }
+                        else
+                        {
+                            //add
+                            ci = new ClientInfo(pStr[0], pStr[1], bool.Parse(pStr[2]));
+                            clients.Add(ci);
+                        }
+                    }
 
+                    //remove ClientInfo in ClientList(clients) if it had removed from server.
+                    for(int i=0; i < clients.Count; i++)
+                    {
+                        if (Array.Find<string>(players, s => s.Substring(0, s.LastIndexOf(':')).Equals(string.Format("{0}:{1}", clients[i].name, clients[i].identification))) == null)
+                            clients.RemoveAt(i--);
+                    }
                     break;
 
                 case NetCommand.Chat:
-                    print(msgReceived.msg);
+                    //print(msgReceived.msg);
+                    //push chatting message to queue
                     txtChatQueue.Enqueue(msgReceived.name + ":" + msgReceived.msg);
                     break;
 
@@ -143,6 +181,9 @@ public class Client : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Disconnect
+    /// </summary>
     public void Disconnect()
     {
         NetworkData msgToSend = new NetworkData();
@@ -156,7 +197,7 @@ public class Client : MonoBehaviour {
     }
 
     /// <summary>
-    /// Message send method.
+    /// Send message method.
     /// </summary>
     /// <param name="msg"></param>
     public void SendData(NetCommand cmd, string msg)

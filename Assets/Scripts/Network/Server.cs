@@ -15,6 +15,8 @@ public class Server : MonoBehaviour {
     List<ClientInfo> clients = new List<ClientInfo>();
     byte[] bData = new byte[1024];
 
+    const int CLIENT_TIMEOUT = 30;
+
 	public void StartServer(int port = 9210)
     {
         try
@@ -48,11 +50,10 @@ public class Server : MonoBehaviour {
 
     private void OnReceive(IAsyncResult ar)
     {
+        EndPoint epSender = new IPEndPoint(IPAddress.Any, 0);
+        udpServer.EndReceiveFrom(ar, ref epSender);
         try
         {
-            EndPoint epSender = new IPEndPoint(IPAddress.Any, 0);
-            udpServer.EndReceiveFrom(ar, ref epSender);
-
             //receive data
             NetworkData dataReceived = new NetworkData(bData);
 
@@ -76,35 +77,35 @@ public class Server : MonoBehaviour {
                     cInfo.name = dataReceived.name;
                     cInfo.identification = dataReceived.identify;
                     clients.Add(cInfo);
-                    udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, epSender, new AsyncCallback(OnSend), epSender);
+                    //udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, epSender, new AsyncCallback(OnSend), epSender);
                     //send every player to this player's connection state
                     foreach (ClientInfo c in clients)
                     {
-                        if (c.ep == epSender) continue;
+                        //if (c.ep == epSender) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
 
                 case NetCommand.Disconnect:
                     //remove player
-                        clients.Remove(clients.Find(c => c.ep == epSender));
+                        clients.Remove(clients.Find(c => c.ep.Equals(epSender)));
                     //send every player to this player's connection state
                     foreach (ClientInfo c in clients)
                     {
-                        if (c.ep == epSender) continue;
+                        //if (c.ep == epSender) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
 
                 case NetCommand.Check:
                     //update lastcheck time
-                    cInfo = clients.Find(c => c.ep == epSender);
+                    cInfo = clients.Find(c => c.ep.Equals(epSender));
                     cInfo.lastCheck = DateTime.Now;
                     dataToSend.msg = "";
                     //Ready to send clients list.
                     StringBuilder sb = new StringBuilder();
                     foreach (ClientInfo c in clients)
-                        sb.AppendFormat("{0},", c.name);
+                        sb.AppendFormat("{0}:{1}:{2},", c.name, c.identification, c.isReady.ToString());
                     dataToSend.msg = sb.ToString();
                     //convert data to byte
                     msg = dataToSend.ConvertToByte();
@@ -122,12 +123,12 @@ public class Server : MonoBehaviour {
 
                 case NetCommand.Ready:
                     //update ready state
-                    cInfo = clients.Find(c => c.ep == epSender);
+                    cInfo = clients.Find(c => c.ep.Equals(epSender));
                     cInfo.isReady = bool.Parse(dataReceived.msg);
                     //send every player to this player's ready state
                     foreach (ClientInfo c in clients)
                     {
-                        if (c.ep == epSender) continue;
+                        //if (c.ep == epSender) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
@@ -143,19 +144,21 @@ public class Server : MonoBehaviour {
                 case NetCommand.PositionRotation:
                     foreach (ClientInfo c in clients)
                     {
-                        if (c.ep == epSender) continue;
+                        //if (c.ep == epSender) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
             }
-
-            //Continue receiving
-            bData = new byte[1024];
-            udpServer.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epSender, new AsyncCallback(OnReceive), epSender);
-      }
+        }
         catch (Exception ex)
         {
             print(ex.Message);
+        }
+        finally
+        {
+            //Continue receiving
+            bData = new byte[1024];
+            udpServer.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epSender, new AsyncCallback(OnReceive), epSender);
         }
     }
 
@@ -180,28 +183,22 @@ public class Server : MonoBehaviour {
         while(isServerOpened)
         {
             yield return new WaitForSeconds(5f);
-            bool isExistDisconnection = false;
             NetworkData data = new NetworkData();
-            foreach (ClientInfo c in clients)
+            for(int i=0; i<clients.Count; i++)
             {
-                //if a client doesn't send check packet until 30 seconds from last check time, 
+                //if a client doesn't send check packet until 30(CLIENT_TIMEOUT) seconds from last check time, 
                 //judge by that client is disconnected from server.
-                if((DateTime.Now - c.lastCheck).Seconds > 30)
+                if ((DateTime.Now - clients[i].lastCheck).Seconds > CLIENT_TIMEOUT)
                 {
-                    data.name = c.name;
-                    data.identify = c.identification;
+                    data.name = clients[i].name;
+                    data.identify = clients[i].identification;
                     data.cmd = NetCommand.Disconnect;
                     data.msg = "";
-                    clients.Remove(c);
-                    isExistDisconnection = true;
-                    break;
+                    clients.RemoveAt(i--);
+                    byte[] msg = data.ConvertToByte();
+                    foreach (ClientInfo c in clients)
+                        udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                 }
-            }
-            if(isExistDisconnection)
-            {
-                byte[] msg = data.ConvertToByte();
-                foreach(ClientInfo c in clients)
-                    udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
             }
         }
     }
