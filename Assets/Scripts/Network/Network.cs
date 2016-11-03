@@ -18,7 +18,7 @@ public enum NetCommand
         /// </summary>
         Disconnect,
         /// <summary>
-        /// Server connection check message (ACK), Get ClientList(Only name)
+        /// Server connection check message (ACK), Get ClientList
         /// </summary>
         Check,      
         /// <summary>
@@ -30,6 +30,10 @@ public enum NetCommand
         /// </summary>
         Ready,
         /// <summary>
+        /// Start Game message. Occured when all players are ready.
+        /// </summary>
+        StartGame,
+        /// <summary>
         /// Player's position/rotation data
         /// </summary>
         PositionRotation,
@@ -39,6 +43,7 @@ public enum NetCommand
         Attack
     }
 
+public enum PlayerState { Dead, Zombie, Human, None}
 
 /// <summary>
 /// Data class
@@ -153,9 +158,9 @@ public class ClientInfo
     /// </summary>
     public Quaternion userRotation;
     /// <summary>
-    /// 0 : Dead, 1 : Zombie, 2 : Human, -1 : Not in game
+    /// Player state (dead, zombie, human, none)
     /// </summary>
-    public int userState;
+    public PlayerState userState;
 
     /// <summary>
     /// Client Information Class
@@ -169,7 +174,7 @@ public class ClientInfo
         isReady = false;
         userPosition = Vector3.zero;
         userRotation = Quaternion.identity;
-        userState = -1;
+        userState = PlayerState.None;
     }
     public ClientInfo(string name, string identification, bool isReady = false)
     {
@@ -181,6 +186,6 @@ public class ClientInfo
         this.isReady = isReady;
         userPosition = Vector3.zero;
         userRotation = Quaternion.identity;
-        userState = -1;
+        userState = PlayerState.None;
     }
 }
