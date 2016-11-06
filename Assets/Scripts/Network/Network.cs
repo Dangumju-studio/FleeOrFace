@@ -18,7 +18,7 @@ public enum NetCommand
         /// </summary>
         Disconnect,
         /// <summary>
-        /// Server connection check message (ACK)
+        /// Server connection check message (ACK), Get ClientList
         /// </summary>
         Check,      
         /// <summary>
@@ -30,75 +30,94 @@ public enum NetCommand
         /// </summary>
         Ready,
         /// <summary>
-        /// Every player's position data
+        /// Start Game message. Occured when all players are ready.
         /// </summary>
-        Position,
+        StartGame,
+        /// <summary>
+        /// Player's position/rotation data
+        /// </summary>
+        PositionRotation,
         /// <summary>
         /// Some player's attack flag data
         /// </summary>
         Attack
     }
 
-public class Network : MonoBehaviour {
-    
+public enum PlayerState { Dead, Zombie, Human, None}
+
+/// <summary>
+/// Data class
+/// </summary>
+public class NetworkData
+{
+    public NetCommand cmd;
+    public string msg;
+    public string name;
     /// <summary>
-    /// Data class
+    /// Endpoint for identify
     /// </summary>
-    public class Data
+    public string identify;
+
+    public NetworkData()
     {
-        public NetCommand cmd;
-        public string msg;
-        public string name;
+        cmd = NetCommand.Null;
+        msg = string.Empty;
+        name = string.Empty;
+        identify = null;
+    }
+    /// <summary>
+    /// Initialize NetworkData from byte array
+    /// </summary>
+    /// <param name="data">Byte array data</param>
+    public NetworkData(byte[] data)
+    {
+        cmd = (NetCommand)BitConverter.ToInt32(data, 0); 
+        int nameLen = BitConverter.ToInt32(data, 4);
+        int identifyLen = BitConverter.ToInt32(data, 8);
+        int msgLen = BitConverter.ToInt32(data, 12);
+        
+        //get name (convert from base64 to restore utf8 string)
+        name = Encoding.UTF8.GetString(Convert.FromBase64String(Encoding.UTF8.GetString(data, 16, nameLen)));
 
-        public Data()
-        {
-            cmd = NetCommand.Null;
+        //get identification
+        identify = Encoding.UTF8.GetString(data, 16 + nameLen, identifyLen);
+
+        //get message
+        if (msgLen > 0)
+            msg = Encoding.UTF8.GetString(Convert.FromBase64String(Encoding.UTF8.GetString(data, 16 + nameLen + identifyLen, msgLen)));
+        else
             msg = string.Empty;
-            name = string.Empty;
-        }
-        public Data(byte[] data)
-        {
-            cmd = (NetCommand)BitConverter.ToInt32(data, 0); //
-            int nameLen = BitConverter.ToInt32(data, 2);    //
-            int msgLen = BitConverter.ToInt32(data, 4);     //
-
-            //get name
-            if (nameLen > 0)
-                name = Encoding.UTF8.GetString(data, 6, nameLen);
-            else
-                name = string.Empty;
-
-            //get message
-            if (msgLen > 0)
-                msg = Encoding.UTF8.GetString(data, 3 + nameLen, msgLen);
-            else
-                msg = string.Empty;
-        }
-
-        /// <summary>
-        /// Convert Data Object to bytes array.
-        /// </summary>
-        /// <returns></returns>
-        public byte[] ConvertToByte()
-        {
-            List<byte> res = new List<byte>();
-
-            //0 : command
-            res.AddRange(BitConverter.GetBytes((short)cmd));
-
-            //1 : name length
-            res.AddRange(BitConverter.GetBytes((short)name.Length));
-
-            //2, 3 : msg length
-            res.AddRange(BitConverter.GetBytes((short)msg.Length));
-
-            //4~ : name, message
-            res.AddRange(Encoding.UTF8.GetBytes(name));
-            res.AddRange(Encoding.UTF8.GetBytes(msg));
-
-            //return bytes array
-            return res.ToArray();
-        }
     }
 
-}
+    /// <summary>
+    /// Convert Data Object to bytes array.
+    /// </summary>
+    /// <returns>Converted Data</returns>
+    public byte[] ConvertToByte()
+    {
+        List<byte> res = new List<byte>();
+        //Convert utf8 string(name, msg) to base64.
+        name = Convert.ToBase64String(Encoding.UTF8.GetBytes(name));
+        msg = Convert.ToBase64String(Encoding.UTF8.GetBytes(msg));
+
+        //0 : command
+        res.AddRange(BitConverter.GetBytes((int)cmd));
+
+        //1 : name length
+        res.AddRange(BitConverter.GetBytes(name.Length));
+
+        //2 : identification length
+        res.AddRange(BitConverter.GetBytes(identify.Length));
+
+        //3, 4 : msg length
+        res.AddRange(BitConverter.GetBytes(msg.Length));
+
+        //5~ : name, identification, message
+        res.AddRange(Encoding.UTF8.GetBytes(name));
+        res.AddRange(Encoding.UTF8.GetBytes(identify));
+        if(msg != null) res.AddRange(Encoding.UTF8.GetBytes(msg));
+
+        //return bytes array
+        return res.ToArray();
+    }
+} 

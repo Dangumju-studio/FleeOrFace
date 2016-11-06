@@ -4,14 +4,44 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Collections;
+using UnityEngine.UI;
+using System.Text;
 
 public class Client : MonoBehaviour {
-    public Socket client;
+    private Socket client;
     public EndPoint epServer;
-    public string strName = "Player";
+    public string playerName = "Player";
+    public string identification = "";  //assigned in MenuController (after Player name input)
+    public string hostIP = "";
+    public bool isConnected = false;
+
+    /// <summary>
+    /// Every client's information list. Except this client.
+    /// </summary>
+    public List<ClientInfo> clients = new List<ClientInfo>();
+
+    /// <summary>
+    /// Chatting text queue.
+    /// Every chatting message is pushed into txtChatQueue. Textbox in game or room refers this object to display chatting message.
+    /// </summary>
+    public Queue<string> txtChatQueue = new Queue<string>();
+
+    /// <summary>
+    /// Player's position and rotation
+    /// </summary
+    string positionRotation = "0,0,0,0,0,0";
+    /// <summary>
+    /// When player push attack button, 'attack' variable turn to 'True'.
+    /// </summary>
+    bool attack = false;
 
     byte[] bData = new byte[1024];
 
+    /// <summary>
+    /// Connect server method
+    /// </summary>
+    /// <param name="ip">Host's IP address</param>
+    /// <param name="port">Host's port number. default = 9210</param>
     public void ConnectToServer(string ip, int port = 9210)
     {
         try
@@ -23,17 +53,17 @@ public class Client : MonoBehaviour {
             IPAddress serverIP = IPAddress.Parse(ip);
             epServer = new IPEndPoint(serverIP, port);
 
-            Network.Data msgToSend = new Network.Data();
+            NetworkData msgToSend = new NetworkData();
             msgToSend.cmd = NetCommand.Connect;
-            msgToSend.msg = null;
-            msgToSend.name = strName;
+            msgToSend.name = playerName;
+            msgToSend.identify = identification;
 
-            byte[] bData = msgToSend.ConvertToByte();
+            bData = msgToSend.ConvertToByte();
 
             //Connect to server
             client.BeginSendTo(bData, 0, bData.Length, SocketFlags.None, epServer, new AsyncCallback(OnSend), null);
 
-            //Receive data from server asynchronously
+            //Receive data from server asynchronously, and save the received data into Client.bData
             bData = new byte[1024];
             client.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epServer, new AsyncCallback(OnReceive), null);
         }
@@ -43,6 +73,11 @@ public class Client : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Called when any data has arrived.
+    /// Received data is in 'Client.bData'(Global variable).
+    /// </summary>
+    /// <param name="ar"></param>
     private void OnReceive(IAsyncResult ar)
     {
         try
@@ -50,32 +85,91 @@ public class Client : MonoBehaviour {
             client.EndReceive(ar);
 
             //Create Data refer to received byte array data
-            Network.Data msgReceived = new Network.Data(bData);
-
+            NetworkData msgReceived = new NetworkData(bData);
+            ClientInfo cInfo;
             switch(msgReceived.cmd)
             {
                 case NetCommand.Connect:
+                    //Connect success
+                    if(msgReceived.name == playerName && msgReceived.identify == identification)
+                    {
+                        isConnected = true;
+                        SendData(NetCommand.Check, "");
+                    } else {
+                        cInfo = new ClientInfo();
+                        cInfo.name = msgReceived.name;
+                        cInfo.identification = msgReceived.identify;
+                        cInfo.lastCheck = DateTime.Now;
+                        clients.Add(cInfo);
+                    }
+                    print(msgReceived.name + " Entered");
+                    txtChatQueue.Enqueue(string.Format("{0} Entered!", msgReceived.name));
 
                     break;
+
                 case NetCommand.Disconnect:
-
+                    if (msgReceived.name == playerName && msgReceived.identify == identification)
+                        isConnected = false;
+                    else
+                    {
+                        //Disconnect someone
+                        clients.Remove(clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify));
+                        txtChatQueue.Enqueue(string.Format("{0} Leave..", msgReceived.name));
+                    }
                     break;
+
                 case NetCommand.Check:
+                    //Check success, Modify ClientList(clients)
+                    string[] players = msgReceived.msg.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach(string s in players)
+                    {
+                        string[] pStr = s.Split(new char[] { ':' });
+                        ClientInfo ci = clients.Find(c => c.name.Equals(pStr[0]) && c.identification.Equals(pStr[1]));
+                        if (ci != null)
+                        {
+                            //modify
+                            ci.isReady = bool.Parse(pStr[2]);
+                            ci.lastCheck = DateTime.Now;
+                        }
+                        else
+                        {
+                            //add
+                            ci = new ClientInfo(pStr[0], pStr[1], bool.Parse(pStr[2]));
+                            clients.Add(ci);
+                        }
+                    }
 
+                    //remove ClientInfo in ClientList(clients) if it had removed from server.
+                    for(int i=0; i < clients.Count; i++)
+                    {
+                        if (Array.Find<string>(players, s => s.Substring(0, s.LastIndexOf(':')).Equals(string.Format("{0}:{1}", clients[i].name, clients[i].identification))) == null)
+                            clients.RemoveAt(i--);
+                    }
                     break;
+
                 case NetCommand.Chat:
-
+                    //print(msgReceived.msg);
+                    //push chatting message to queue
+                    txtChatQueue.Enqueue(msgReceived.name + ":" + msgReceived.msg);
                     break;
+
                 case NetCommand.Ready:
+                    cInfo = clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify);
+                    cInfo.isReady = bool.Parse(msgReceived.msg);
+                    break;
+
+                case NetCommand.PositionRotation:
 
                     break;
-                case NetCommand.Position:
 
-                    break;
                 case NetCommand.Attack:
 
                     break;
             }
+
+            //Continue receiving
+            bData = new byte[1024];
+            client.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epServer, new AsyncCallback(OnReceive), null);
 
         }
         catch (Exception ex)
@@ -96,15 +190,61 @@ public class Client : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Disconnect
+    /// </summary>
     public void Disconnect()
     {
-        Network.Data msgToSend = new Network.Data();
+        NetworkData msgToSend = new NetworkData();
         msgToSend.cmd = NetCommand.Disconnect;
-        msgToSend.name = strName;
+        msgToSend.name = playerName;
         msgToSend.msg = null;
 
         byte[] bData = msgToSend.ConvertToByte();
         client.SendTo(bData, 0, bData.Length, SocketFlags.None, epServer);
         client.Close();
+    }
+
+    /// <summary>
+    /// Send message method.
+    /// </summary>
+    /// <param name="msg"></param>
+    public void SendData(NetCommand cmd, string msg)
+    {
+        NetworkData newMessage = new NetworkData();
+        newMessage.name = playerName;
+        newMessage.identify = identification;
+        newMessage.cmd = cmd;
+        newMessage.msg = msg;
+        byte[] bData = newMessage.ConvertToByte();
+        client.BeginSendTo(bData, 0, bData.Length, SocketFlags.None, epServer, new AsyncCallback(OnSend), null);
+    }
+
+    /// <summary>
+    /// Send check message every 5 seconds to confirm connection.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator SendCheck()
+    {
+        while(isConnected)
+        {
+            yield return new WaitForSeconds(5f);
+            SendData(NetCommand.Check, "");
+        }
+    }
+
+    /// <summary>
+    /// Send Player's control status.
+    /// Player's position, Rotation, and Attack status.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator SendPlayerControl()
+    {
+        while(true)
+        {
+            SendData(NetCommand.PositionRotation, positionRotation);
+            if (attack) SendData(NetCommand.Attack, "True");
+            yield return null;
+        }
     }
 }
