@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using System.Text;
 
 public class Client : MonoBehaviour {
-    public Socket client;
+    private Socket client;
     public EndPoint epServer;
     public string playerName = "Player";
     public string identification = "";  //assigned in MenuController (after Player name input)
@@ -25,6 +25,15 @@ public class Client : MonoBehaviour {
     /// Every chatting message is pushed into txtChatQueue. Textbox in game or room refers this object to display chatting message.
     /// </summary>
     public Queue<string> txtChatQueue = new Queue<string>();
+
+    /// <summary>
+    /// Player's position and rotation
+    /// </summary
+    string positionRotation = "0,0,0,0,0,0";
+    /// <summary>
+    /// When player push attack button, 'attack' variable turn to 'True'.
+    /// </summary>
+    bool attack = false;
 
     byte[] bData = new byte[1024];
 
@@ -215,12 +224,27 @@ public class Client : MonoBehaviour {
     /// Send check message every 5 seconds to confirm connection.
     /// </summary>
     /// <returns></returns>
-    public IEnumerator sendCheck()
+    public IEnumerator SendCheck()
     {
         while(isConnected)
         {
             yield return new WaitForSeconds(5f);
             SendData(NetCommand.Check, "");
+        }
+    }
+
+    /// <summary>
+    /// Send Player's control status.
+    /// Player's position, Rotation, and Attack status.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator SendPlayerControl()
+    {
+        while(true)
+        {
+            SendData(NetCommand.PositionRotation, positionRotation);
+            if (attack) SendData(NetCommand.Attack, "True");
+            yield return null;
         }
     }
 }

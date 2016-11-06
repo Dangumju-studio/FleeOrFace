@@ -106,7 +106,7 @@ public class WaitingRoom : MonoBehaviour {
         //Connection success. Load waiting lobby.
         txtChatInput.readOnly = false;
         txtChatMessage.text += "Connected!\n";
-        StartCoroutine(client.sendCheck());
+        StartCoroutine(client.SendCheck());
     }
 
     public void btnReady_Clicked()
