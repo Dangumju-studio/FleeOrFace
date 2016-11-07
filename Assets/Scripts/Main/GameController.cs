@@ -41,7 +41,7 @@ public class GameController : MonoBehaviour {
         }
 
         //Load Map (Game Scene)
-        StartCoroutine(LoadGameScene(IngameManager.mapName));
+        StartCoroutine(LoadGameScene("Zombie1"));
 
         ////Load other players
         //foreach (ClientInfo ci in client.clients)
