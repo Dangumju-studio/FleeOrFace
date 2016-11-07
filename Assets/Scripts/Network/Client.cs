@@ -29,11 +29,11 @@ public class Client : MonoBehaviour {
     /// <summary>
     /// Player's position and rotation
     /// </summary
-    string positionRotation = "0,0,0,0,0,0";
+    public string positionRotation = "0,0,0,0,0,0";
     /// <summary>
     /// When player push attack button, 'attack' variable turn to 'True'.
     /// </summary>
-    bool attack = false;
+    public bool attack = false;
 
     byte[] bData = new byte[1024];
 
@@ -155,11 +155,20 @@ public class Client : MonoBehaviour {
 
                 case NetCommand.Ready:
                     cInfo = clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify);
-                    cInfo.isReady = bool.Parse(msgReceived.msg);
+                    if (cInfo != null) cInfo.isReady = bool.Parse(msgReceived.msg);
+                    break;
+                case NetCommand.StartGame:
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("main");
                     break;
 
                 case NetCommand.PositionRotation:
-
+                    cInfo = clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify);
+                    string[] values = msgReceived.msg.Split(new char[] { ',' });
+                    if(cInfo != null)
+                    {
+                        cInfo.userPosition = new Vector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
+                        cInfo.userRotation = new Quaternion(float.Parse(values[3]), float.Parse(values[4]), float.Parse(values[5]), float.Parse(values[6]));
+                    }
                     break;
 
                 case NetCommand.Attack:
@@ -236,15 +245,12 @@ public class Client : MonoBehaviour {
     /// <summary>
     /// Send Player's control status.
     /// Player's position, Rotation, and Attack status.
+    /// Called from main game scene - SceneController - FixedUpdate function
     /// </summary>
     /// <returns></returns>
-    public IEnumerator SendPlayerControl()
+    public void SendPlayerControl()
     {
-        while(true)
-        {
-            SendData(NetCommand.PositionRotation, positionRotation);
-            if (attack) SendData(NetCommand.Attack, "True");
-            yield return null;
-        }
+        SendData(NetCommand.PositionRotation, positionRotation);
+        if (attack) { SendData(NetCommand.Attack, "True"); attack = false; }
     }
 }

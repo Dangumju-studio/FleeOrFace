@@ -43,7 +43,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
-        private Animator m_Animator;
+        public Animator m_Animator;
 
         // Use this for initialization
         private void Start()
@@ -58,7 +58,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera_wrapper.transform);
-            m_Animator = GetComponent<Animator>();
+            //m_Animator = GetComponent<Animator>();
            
         }
 
@@ -277,7 +277,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 if (!Attacked)
                 {
                     Attacked = true;
-                    float m_atkMotion = Random.Range(0, 1f);
+                    float m_atkMotion = Random.Range(0, 2);
                     m_Animator.SetFloat("AttackMotion", m_atkMotion);
                     m_Animator.SetBool("OnAttack", true);
                 }

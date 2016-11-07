@@ -15,6 +15,11 @@ public class IngameManager {
     List<ClientInfo> clients;
 
     /// <summary>
+    /// Map number.
+    /// </summary>
+    public static string mapName = "";
+
+    /// <summary>
     /// Current game's manager.
     /// </summary>
     /// <param name="server">Current server</param>

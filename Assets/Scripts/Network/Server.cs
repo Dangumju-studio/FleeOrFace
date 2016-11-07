@@ -142,7 +142,7 @@ public class Server : MonoBehaviour {
                     foreach (ClientInfo c in clients)
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
 
-                    //if all players are ready, start the game.
+                    //if all players are ready, START THE GAME.
                     cInfo = clients.Find(c => c.isReady == false);
                     if(cInfo != null)
                     {

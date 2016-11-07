@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public class WaitingRoom : MonoBehaviour {
     Client client;
-    Server server;
+    //Server server;
     [SerializeField] Text myPlayerName;
     [SerializeField] Text txtChatMessage;
     [SerializeField] ScrollRect scrChat;
@@ -24,7 +24,7 @@ public class WaitingRoom : MonoBehaviour {
     // Use this for initialization
     void Start () {
         client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
-        server = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Server>();
+        //server = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Server>();
 
         playerInfoList = new List<PlayerInfo>();
         myPlayerName.text = client.playerName;
