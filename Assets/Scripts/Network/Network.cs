@@ -30,7 +30,11 @@ public enum NetCommand
         /// </summary>
         Ready,
         /// <summary>
-        /// Start Game message. Occured when all players are ready.
+        /// Load game message. Occured when all players are ready.
+        /// </summary>
+        LoadGame,
+        /// <summary>
+        /// Start Game message. Occured when all players' game loading is done.
         /// </summary>
         StartGame,
         /// <summary>

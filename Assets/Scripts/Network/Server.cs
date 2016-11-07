@@ -82,6 +82,7 @@ public class Server : MonoBehaviour {
 
             switch (dataReceived.cmd)
             {
+                // When player connected
                 case NetCommand.Connect:
                     //ignore player (clients size = 8)
                     if (clients.Count >= 8)
@@ -102,6 +103,7 @@ public class Server : MonoBehaviour {
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     break;
 
+                //When player disconnected
                 case NetCommand.Disconnect:
                     //remove player
                         clients.Remove(clients.Find(c => c.ep.Equals(epSender)));
@@ -110,9 +112,11 @@ public class Server : MonoBehaviour {
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     break;
 
+                //Check player's connection state
                 case NetCommand.Check:
                     //update lastcheck time
                     cInfo = clients.Find(c => c.ep.Equals(epSender));
+                    print("Checked: " + cInfo.name);
                     cInfo.lastCheck = DateTime.Now;
                     dataToSend.msg = "";
                     //Ready to send clients list.
@@ -125,6 +129,7 @@ public class Server : MonoBehaviour {
                     udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, epSender, new AsyncCallback(OnSend), epSender);
                     break;
 
+                //Chatting message
                 case NetCommand.Chat:
                     //send every player to chat message
                     foreach (ClientInfo c in clients)
@@ -133,7 +138,8 @@ public class Server : MonoBehaviour {
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
-
+                
+                //Ready in lobby
                 case NetCommand.Ready:
                     //update ready state
                     cInfo = clients.Find(c => c.ep.Equals(epSender));
@@ -142,9 +148,27 @@ public class Server : MonoBehaviour {
                     foreach (ClientInfo c in clients)
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
 
-                    //if all players are ready, START THE GAME.
-                    cInfo = clients.Find(c => c.isReady == false);
-                    if(cInfo != null)
+                    //if all players are ready, Start LOADING GAME SCENE
+                    cInfo = null;
+                    if (clients.Count >= 2)
+                        cInfo = clients.Find(c => c.isReady == false);
+                    if (cInfo == null)
+                    {
+                        dataToSend.cmd = NetCommand.LoadGame;
+                        dataToSend.msg = "";
+                        msg = dataToSend.ConvertToByte();
+                        foreach (ClientInfo c in clients)
+                            udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                    }
+                    break;
+                //When one's Loading done
+                case NetCommand.LoadGame:
+                    cInfo = clients.Find(c => c.ep.Equals(epSender));
+                    cInfo.isLoadingDone = bool.Parse(dataReceived.msg);
+                    //if all players' loading is done, START THE GAME.
+                    cInfo = null;
+                    cInfo = clients.Find(c => c.isLoadingDone == false);
+                    if (cInfo == null)
                     {
                         dataToSend.cmd = NetCommand.StartGame;
                         dataToSend.msg = "";
@@ -153,7 +177,8 @@ public class Server : MonoBehaviour {
                             udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
-
+                
+                //Attack
                 case NetCommand.Attack:
                     foreach (ClientInfo c in clients)
                     {
@@ -161,7 +186,7 @@ public class Server : MonoBehaviour {
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
-
+                //Moving/Turning
                 case NetCommand.PositionRotation:
                     foreach (ClientInfo c in clients)
                     {

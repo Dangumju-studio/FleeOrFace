@@ -14,6 +14,8 @@ public class Client : MonoBehaviour {
     public string identification = "";  //assigned in MenuController (after Player name input)
     public string hostIP = "";
     public bool isConnected = false;
+    public bool isLoadingStarting = false;
+    public bool isGamePlaying = false;
 
     /// <summary>
     /// Every client's information list. Except this client.
@@ -29,7 +31,7 @@ public class Client : MonoBehaviour {
     /// <summary>
     /// Player's position and rotation
     /// </summary
-    public string positionRotation = "0,0,0,0,0,0";
+    public string positionRotation = "0,0,0,0,0,0,0,True";  //(position),(rotation),(onground)
     /// <summary>
     /// When player push attack button, 'attack' variable turn to 'True'.
     /// </summary>
@@ -157,8 +159,12 @@ public class Client : MonoBehaviour {
                     cInfo = clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify);
                     if (cInfo != null) cInfo.isReady = bool.Parse(msgReceived.msg);
                     break;
+                case NetCommand.LoadGame:
+                    isLoadingStarting = true;
+                    break;
+
                 case NetCommand.StartGame:
-                    UnityEngine.SceneManagement.SceneManager.LoadScene("main");
+                    isGamePlaying = true;
                     break;
 
                 case NetCommand.PositionRotation:
@@ -168,6 +174,7 @@ public class Client : MonoBehaviour {
                     {
                         cInfo.userPosition = new Vector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
                         cInfo.userRotation = new Quaternion(float.Parse(values[3]), float.Parse(values[4]), float.Parse(values[5]), float.Parse(values[6]));
+                        cInfo.userIsOnGround = bool.Parse(values[7]);
                     }
                     break;
 
@@ -177,13 +184,17 @@ public class Client : MonoBehaviour {
             }
 
             //Continue receiving
-            bData = new byte[1024];
-            client.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epServer, new AsyncCallback(OnReceive), null);
+            //bData = new byte[1024];
+            //client.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epServer, new AsyncCallback(OnReceive), null);
 
         }
         catch (Exception ex)
         {
             print(ex.Message);
+        }
+        finally {
+            bData = new byte[1024];
+            client.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epServer, new AsyncCallback(OnReceive), null);
         }
     }
 
@@ -237,9 +248,11 @@ public class Client : MonoBehaviour {
     {
         while(isConnected)
         {
+            print("SendCheck:" + playerName);
             yield return new WaitForSeconds(5f);
             SendData(NetCommand.Check, "");
         }
+        print("Disconnected. No more check");
     }
 
     /// <summary>

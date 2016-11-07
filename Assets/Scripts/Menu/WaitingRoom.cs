@@ -13,6 +13,7 @@ public class WaitingRoom : MonoBehaviour {
     [SerializeField] InputField txtChatInput;
     [SerializeField] Text btnReady;
     bool isReady = false;
+    bool isLoadingGame = false; //if true, main scene is loading now.
 
     //Player Object panel list
     List<PlayerInfo> playerInfoList;
@@ -94,6 +95,20 @@ public class WaitingRoom : MonoBehaviour {
         }
         playerInfoWrapper.GetComponent<RectTransform>().offsetMax = new Vector2(0, playerInfoList.Count);
 	}
+
+    void FixedUpdate()
+    {
+        //Start game
+        if (client.isLoadingStarting && !isLoadingGame)
+        {
+            StopCoroutine(client.SendCheck());  //While scene switching, coroutine will not work. (Unity system)
+            isLoadingGame = true;
+            //TEST MAP
+            IngameManager.mapName = "Zombie1";
+            
+            UnityEngine.SceneManagement.SceneManager.LoadScene("main");
+        }
+    }
 
     /// <summary>
     /// Delay to load room until server is available.
