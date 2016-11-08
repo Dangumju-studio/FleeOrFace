@@ -26,11 +26,20 @@ public enum NetCommand
         /// </summary>
         Chat,
         /// <summary>
+        /// Map setting. Received every 1s in lobby(waiting room)
+        /// Format: MapNumber,3rdCam
+        /// </summary>
+        MapSetting,
+        /// <summary>
         /// Ready message in player waiting room
         /// </summary>
         Ready,
         /// <summary>
-        /// Start Game message. Occured when all players are ready.
+        /// Load game message. Occured when all players are ready.
+        /// </summary>
+        LoadGame,
+        /// <summary>
+        /// Start Game message. Occured when all players' game loading is done.
         /// </summary>
         StartGame,
         /// <summary>

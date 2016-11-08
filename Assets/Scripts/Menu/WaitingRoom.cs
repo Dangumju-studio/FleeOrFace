@@ -7,24 +7,41 @@ using System.Collections.Generic;
 public class WaitingRoom : MonoBehaviour {
     Client client;
     //Server server;
+    IngameManager gameManager;
     [SerializeField] Text myPlayerName;
     [SerializeField] Text txtChatMessage;
     [SerializeField] ScrollRect scrChat;
     [SerializeField] InputField txtChatInput;
     [SerializeField] Text btnReady;
     bool isReady = false;
+    bool isLoadingGame = false; //if true, main scene is loading now.
 
     //Player Object panel list
     List<PlayerInfo> playerInfoList;
     [SerializeField] GameObject playerInfoPrefab;
     [SerializeField] Transform playerInfoWrapper;
 
-    //chatting text queue
+    //Map setting objects
+    [SerializeField] Dropdown lstMap;
+    [SerializeField] Toggle chk3rdcam;
 
     // Use this for initialization
     void Start () {
         client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
-        //server = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Server>();
+        gameManager = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<IngameManager>();
+
+        //load maplist
+        foreach (string s in gameManager.mapList)
+        lstMap.options.Add(new Dropdown.OptionData(s));
+        lstMap.value = 0;
+        lstMap.RefreshShownValue();
+
+        if(GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Server>().isServerOpened)
+        {
+            lstMap.interactable = true;
+            chk3rdcam.interactable = true;
+        }
+
 
         playerInfoList = new List<PlayerInfo>();
         myPlayerName.text = client.playerName;
@@ -93,7 +110,23 @@ public class WaitingRoom : MonoBehaviour {
             playerInfoList[i].isReady = ci.isReady;
         }
         playerInfoWrapper.GetComponent<RectTransform>().offsetMax = new Vector2(0, playerInfoList.Count);
+
+        //Map setting update
+        lstMap.value = gameManager.mapNumber;
+        chk3rdcam.isOn = gameManager.is3rdCam;
 	}
+
+    void FixedUpdate()
+    {
+        //Start game
+        if (client.isLoadingStarting && !isLoadingGame)
+        {
+            StopCoroutine(client.SendCheck());  //While scene switching, coroutine will not work. (Unity system)
+            isLoadingGame = true;
+            
+            UnityEngine.SceneManagement.SceneManager.LoadScene("main");
+        }
+    }
 
     /// <summary>
     /// Delay to load room until server is available.
@@ -125,5 +158,14 @@ public class WaitingRoom : MonoBehaviour {
             scrChat.verticalNormalizedPosition = 0;
             txtChatInput.ActivateInputField();
         }
+    }
+
+    public void MapSetting_Changed()
+    {
+        gameManager.mapNumber = lstMap.value;
+        gameManager.is3rdCam = chk3rdcam.isOn;
+        int mapNum = lstMap.value;
+        bool is3rd = chk3rdcam.isOn;
+        client.SendData(NetCommand.MapSetting, string.Format("{0},{1}", mapNum, is3rd));
     }
 }

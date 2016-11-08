@@ -30,6 +30,11 @@ public class ClientInfo
     public bool isReady;
 
     /// <summary>
+    /// Game scene loading state
+    /// </summary>
+    public bool isLoadingDone;
+
+    /// <summary>
     /// User character position
     /// </summary>
     public Vector3 userPosition;
@@ -37,6 +42,14 @@ public class ClientInfo
     /// User character rotation
     /// </summary>
     public Quaternion userRotation;
+    /// <summary>
+    /// User character onGround
+    /// </summary>
+    public bool userIsOnGround;
+    /// <summary>
+    /// User flash state
+    /// </summary>
+    public bool userIsFlashOn;
     /// <summary>
     /// Player state (dead, zombie, human, none)
     /// </summary>
@@ -52,8 +65,11 @@ public class ClientInfo
         name = "";
         lastCheck = DateTime.Now;
         isReady = false;
+        isLoadingDone = false;
         userPosition = Vector3.zero;
         userRotation = Quaternion.identity;
+        userIsOnGround = true;
+        userIsFlashOn = false;
         userState = PlayerState.None;
     }
     public ClientInfo(string name, string identification, bool isReady = false)
@@ -64,8 +80,11 @@ public class ClientInfo
         this.identification = identification;
         lastCheck = DateTime.Now;
         this.isReady = isReady;
+        isLoadingDone = false;
         userPosition = Vector3.zero;
         userRotation = Quaternion.identity;
+        userIsOnGround = true;
+        userIsFlashOn = false;
         userState = PlayerState.None;
     }
 }
