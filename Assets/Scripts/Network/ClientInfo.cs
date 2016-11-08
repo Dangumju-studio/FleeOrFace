@@ -47,6 +47,10 @@ public class ClientInfo
     /// </summary>
     public bool userIsOnGround;
     /// <summary>
+    /// User flash state
+    /// </summary>
+    public bool userIsFlashOn;
+    /// <summary>
     /// Player state (dead, zombie, human, none)
     /// </summary>
     public PlayerState userState;
@@ -65,6 +69,7 @@ public class ClientInfo
         userPosition = Vector3.zero;
         userRotation = Quaternion.identity;
         userIsOnGround = true;
+        userIsFlashOn = false;
         userState = PlayerState.None;
     }
     public ClientInfo(string name, string identification, bool isReady = false)
@@ -79,6 +84,7 @@ public class ClientInfo
         userPosition = Vector3.zero;
         userRotation = Quaternion.identity;
         userIsOnGround = true;
+        userIsFlashOn = false;
         userState = PlayerState.None;
     }
 }

@@ -18,8 +18,11 @@ public class GameController : MonoBehaviour {
     #endregion
 
     Client client;
-    //Server server;
+    IngameManager gameManager;
+    
     [SerializeField] GameObject playerCharPrefab;
+    bool isFlashOn = false;
+    [SerializeField] GameObject FlashObj;
 
     //StringBuilder for Position and Rotation
     StringBuilder sbPosRot = new StringBuilder();
@@ -31,21 +34,29 @@ public class GameController : MonoBehaviour {
 
         //Get client
         client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
-
+        gameManager = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<IngameManager>();
+        isThirdPersonCamera = gameManager.is3rdCam;
         //Set camera mode(FPS or TPS)
         if (isThirdPersonCamera)
         {
             m_fpsCtrl.m_UseHeadBob = false;
             m_PlayerCamera.transform.localPosition = new Vector3(0, 2, -2.5f);
             m_PlayerCamera.transform.localRotation = Quaternion.Euler(30, 0, 0);
-            
+
+        }
+        else {
+            if(!OVRManager.isHmdPresent)
+            {
+                OVRManager.instance.gameObject.GetComponent<OVRCameraRig>().enabled = false;
+                OVRManager.instance.enabled = false;
+            }
         }
 
         //Start check message sending corouting
         StartCoroutine(client.SendCheck());
 
         //Load Map (Game Scene)
-        StartCoroutine(LoadGameScene("Zombie1"));
+        StartCoroutine(LoadGameScene(gameManager.mapList[gameManager.mapNumber]));
 
         //Load other players
         foreach (ClientInfo ci in client.clients)
@@ -91,9 +102,10 @@ public class GameController : MonoBehaviour {
         sbPosRot.Length = 0;
         //Append player's position and rotation value to stringbuilder
         Transform playerT = m_fpsCtrl.gameObject.transform;
-        sbPosRot.AppendFormat("{0},{1},{2},{3},{4},{5},{6},{7}",    //Position(x, y, z), Rotation(x, y, z, w -> Quaternion) 
+        sbPosRot.AppendFormat("{0},{1},{2},{3},{4},{5},{6},{7},{8}",    //Position(x, y, z), Rotation(x, y, z, w -> Quaternion), OnGround, Flash
             playerT.position.x, playerT.position.y, playerT.position.z,
-            playerT.rotation.x, playerT.rotation.y, playerT.rotation.z, playerT.rotation.w, m_fpsCtrl.m_Animator.GetBool("OnGround"));
+            playerT.rotation.x, playerT.rotation.y, playerT.rotation.z, playerT.rotation.w,
+            m_fpsCtrl.m_Animator.GetBool("OnGround"), isFlashOn);
         //Push position and rotation value
         if(client != null) client.positionRotation = sbPosRot.ToString();
 
@@ -123,7 +135,7 @@ public class GameController : MonoBehaviour {
                 m_pnIngameUI.SetActive(true);
                 m_fpsCtrl.enabled = true;
                 m_fpsCtrl.gameObject.GetComponent<Rigidbody>().useGravity = true;
-
+                m_fpsCtrl.transform.position = new Vector3(m_fpsCtrl.transform.position.x, 10, m_fpsCtrl.transform.position.z);
                 print("Game start");
             }
 

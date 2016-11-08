@@ -17,6 +17,8 @@ public class Client : MonoBehaviour {
     public bool isLoadingStarting = false;
     public bool isGamePlaying = false;
 
+    IngameManager gameManager;
+
     /// <summary>
     /// Every client's information list. Except this client.
     /// </summary>
@@ -31,13 +33,16 @@ public class Client : MonoBehaviour {
     /// <summary>
     /// Player's position and rotation
     /// </summary
-    public string positionRotation = "0,0,0,0,0,0,0,True";  //(position),(rotation),(onground)
+    public string positionRotation = "0,0,0,0,0,0,0,True,False";  //(position),(rotation),(onground),(isFlashOn)
     /// <summary>
     /// When player push attack button, 'attack' variable turn to 'True'.
     /// </summary>
     public bool attack = false;
 
     byte[] bData = new byte[1024];
+
+    void Start()
+    { gameManager = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<IngameManager>(); }
 
     /// <summary>
     /// Connect server method
@@ -155,6 +160,12 @@ public class Client : MonoBehaviour {
                     txtChatQueue.Enqueue(msgReceived.name + ":" + msgReceived.msg);
                     break;
 
+                case NetCommand.MapSetting:
+                    string[] settingvalues = msgReceived.msg.Split(new char[] { ',' });
+                    gameManager.mapNumber = int.Parse(settingvalues[0]);
+                    gameManager.is3rdCam = bool.Parse(settingvalues[1]);
+                    break;
+
                 case NetCommand.Ready:
                     cInfo = clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify);
                     if (cInfo != null) cInfo.isReady = bool.Parse(msgReceived.msg);
@@ -175,6 +186,7 @@ public class Client : MonoBehaviour {
                         cInfo.userPosition = new Vector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
                         cInfo.userRotation = new Quaternion(float.Parse(values[3]), float.Parse(values[4]), float.Parse(values[5]), float.Parse(values[6]));
                         cInfo.userIsOnGround = bool.Parse(values[7]);
+                        cInfo.userIsFlashOn = bool.Parse(values[8]);
                     }
                     break;
 

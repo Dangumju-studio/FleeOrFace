@@ -10,12 +10,17 @@ public class Server : MonoBehaviour {
 
     UdpClient udpClient;
     Socket udpServer;
-    bool isServerOpened = false;
+    public bool isServerOpened = false;
 
-    List<ClientInfo> clients = new List<ClientInfo>();
+    public List<ClientInfo> clients = new List<ClientInfo>();
     byte[] bData = new byte[1024];
 
     const int CLIENT_TIMEOUT = 30;
+
+    IngameManager gameManager;
+
+    void Start()
+    { gameManager = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<IngameManager>(); }
 
     /// <summary>
     /// Start the server.
@@ -134,11 +139,23 @@ public class Server : MonoBehaviour {
                     //send every player to chat message
                     foreach (ClientInfo c in clients)
                     {
-                       if (c.ep == epSender) continue;
+                       if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
-                
+
+                //Map setting changed
+                case NetCommand.MapSetting:
+                    string[] settingvalues = dataReceived.msg.Split(new char[] { ',' });
+                    gameManager.mapNumber = int.Parse(settingvalues[0]);
+                    gameManager.is3rdCam = bool.Parse(settingvalues[1]);
+                    foreach (ClientInfo c in clients)
+                    {
+                        if (c.ep.Equals(epSender)) continue;
+                        udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                    }
+                    break;
+
                 //Ready in lobby
                 case NetCommand.Ready:
                     //update ready state
@@ -150,15 +167,18 @@ public class Server : MonoBehaviour {
 
                     //if all players are ready, Start LOADING GAME SCENE
                     cInfo = null;
-                    if (clients.Count >= 2)
-                        cInfo = clients.Find(c => c.isReady == false);
-                    if (cInfo == null)
+                    if (clients.Count >= 1)//2)
                     {
-                        dataToSend.cmd = NetCommand.LoadGame;
-                        dataToSend.msg = "";
-                        msg = dataToSend.ConvertToByte();
-                        foreach (ClientInfo c in clients)
-                            udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                        cInfo = clients.Find(c => c.isReady == false);
+                        if (cInfo == null)
+                        {
+                            gameManager.Initialize();
+                            dataToSend.cmd = NetCommand.LoadGame;
+                            dataToSend.msg = "";
+                            msg = dataToSend.ConvertToByte();
+                            foreach (ClientInfo c in clients)
+                                udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                        }
                     }
                     break;
                 //When one's Loading done
@@ -182,7 +202,7 @@ public class Server : MonoBehaviour {
                 case NetCommand.Attack:
                     foreach (ClientInfo c in clients)
                     {
-                        if (c.ep == epSender) continue;
+                        if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
@@ -190,7 +210,7 @@ public class Server : MonoBehaviour {
                 case NetCommand.PositionRotation:
                     foreach (ClientInfo c in clients)
                     {
-                        if (c.ep == epSender) continue;
+                        if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;

@@ -2232,6 +2232,7 @@ GameObject:
   - 114: {fileID: 1894630792}
   - 114: {fileID: 1894630791}
   - 114: {fileID: 1894630794}
+  - 114: {fileID: 1894630795}
   m_Layer: 0
   m_Name: NetworkController
   m_TagString: NetworkController
@@ -2252,8 +2253,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: Player
   identification: 
+  hostIP: 
   isConnected: 0
-  txtChat: {fileID: 0}
+  isLoadingStarting: 0
+  isGamePlaying: 0
+  positionRotation: 0,0,0,0,0,0,0,True,False
+  attack: 0
 --- !u!114 &1894630792
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2265,6 +2270,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa3830d92508a77458a0fb9091afdb73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isServerOpened: 0
 --- !u!4 &1894630793
 Transform:
   m_ObjectHideFlags: 0
@@ -2289,6 +2295,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eb858638e1a08b4ba8fcc6ef1ee3657, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1894630795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1894630790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9dc53b2fe057504aa0216cff811c08b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapNumber: 0
+  is3rdCam: 0
+  mapList:
+  - Zombie1
+  - Zombie1aaa
 --- !u!1 &1968955882
 GameObject:
   m_ObjectHideFlags: 0

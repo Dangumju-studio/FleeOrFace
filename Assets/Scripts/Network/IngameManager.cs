@@ -2,7 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class IngameManager {
+/// <summary>
+/// Singleton Game Manager.
+/// </summary>
+public class IngameManager : MonoBehaviour {
 
     bool _isGamePlaying;
     bool isGamePlaying
@@ -12,30 +15,34 @@ public class IngameManager {
     }
 
     Server server;
-    List<ClientInfo> clients;
+
+    List<Vector3> spawnPoint;
 
     /// <summary>
     /// Map number.
     /// </summary>
-    public static string mapName = "";
+    public int mapNumber = 0;
+    /// <summary>
+    /// 3rd cam mode
+    /// </summary>
+    public bool is3rdCam = false;
+    public string[] mapList;
 
     /// <summary>
     /// Current game's manager.
     /// </summary>
     /// <param name="server">Current server</param>
     /// <param name="clients">Current clientinfo list</param>
-    public IngameManager(ref Server server, ref List<ClientInfo> clients)
+    void Start()
     {
-        this.server = server;
-        this.clients = clients;
-        Initialize();
+        server = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Server>();
     }
 
     /// <summary>
     /// Initialize game
     /// </summary>
     /// <returns>Result of initializing. True = success</returns>
-    bool Initialize()
+    public bool Initialize()
     {
         try
         {
@@ -56,19 +63,19 @@ public class IngameManager {
     /// </summary>
     void DistributeRole()
     {
-        int half = clients.Count / 2;
-        for (int i = 0; i < clients.Count; i++)
+        int half = server.clients.Count / 2;
+        for (int i = 0; i < server.clients.Count; i++)
         {
-            if (i <= half) clients[i].userState = PlayerState.Zombie;
-            else clients[i].userState = PlayerState.Human;
+            if (i <= half) server.clients[i].userState = PlayerState.Zombie;
+            else server.clients[i].userState = PlayerState.Human;
         }
         //mix
-        for (int i = 0; i < clients.Count; i++)
+        for (int i = 0; i < server.clients.Count; i++)
         {
-            int changeTarget = Random.Range(0, clients.Count);
-            PlayerState tmp = clients[i].userState;
-            clients[i].userState = clients[changeTarget].userState;
-            clients[changeTarget].userState = tmp;
+            int changeTarget = Random.Range(0, server.clients.Count);
+            PlayerState tmp = server.clients[i].userState;
+            server.clients[i].userState = server.clients[changeTarget].userState;
+            server.clients[changeTarget].userState = tmp;
         }
     }
 }

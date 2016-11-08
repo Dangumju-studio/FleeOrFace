@@ -22,6 +22,9 @@ public class OtherCharacter : MonoBehaviour {
 
     Animator m_animator;
     [SerializeField] GameObject zombie, human;
+
+    [SerializeField] GameObject FlashObj;
+
     Vector3 oldPos;
     float oldVelX, oldVelZ;
 
@@ -55,5 +58,7 @@ public class OtherCharacter : MonoBehaviour {
         oldVelX = velX; oldVelZ = velZ;
         m_animator.SetFloat("Side", velX / Time.deltaTime);
         m_animator.SetFloat("Forward", velZ / Time.deltaTime);
+
+        FlashObj.SetActive(c.userIsFlashOn);
     }
 }

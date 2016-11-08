@@ -31,6 +31,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         [SerializeField] private GameObject m_Camera_wrapper;
         [SerializeField] private Camera m_Camera;
+        [SerializeField] private GameObject m_Camera_objRig;
         private bool m_Jump;
         private float m_YRotation;
         private Vector2 m_Input;
@@ -190,18 +191,18 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             if (m_CharacterController.velocity.magnitude > 0 && m_CharacterController.isGrounded)
             {
-                m_Camera.transform.localPosition =
+                m_Camera_objRig.transform.localPosition =
                     m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
                                       (speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
-                newCameraPosition = m_Camera.transform.localPosition;
-                newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset();
+                newCameraPosition = m_Camera_objRig.transform.localPosition;
+                newCameraPosition.y = m_Camera_objRig.transform.localPosition.y - m_JumpBob.Offset();
             }
             else
             {
-                newCameraPosition = m_Camera.transform.localPosition;
+                newCameraPosition = m_Camera_objRig.transform.localPosition;
                 newCameraPosition.y = m_OriginalCameraPosition.y - m_JumpBob.Offset();
             }
-            m_Camera.transform.localPosition = newCameraPosition;
+            m_Camera_objRig.transform.localPosition = newCameraPosition;
         }
 
 

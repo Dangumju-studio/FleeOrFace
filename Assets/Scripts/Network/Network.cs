@@ -26,6 +26,11 @@ public enum NetCommand
         /// </summary>
         Chat,
         /// <summary>
+        /// Map setting. Received every 1s in lobby(waiting room)
+        /// Format: MapNumber,3rdCam
+        /// </summary>
+        MapSetting,
+        /// <summary>
         /// Ready message in player waiting room
         /// </summary>
         Ready,
