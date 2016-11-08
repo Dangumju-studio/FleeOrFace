@@ -1526,6 +1526,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8370cc0c68730634fa79a47f2842ebf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUGING_MODE: 1
   isThirdPersonCamera: 0
   m_PlayerCamera: {fileID: 2018820222}
   m_fpsCtrl: {fileID: 1868779870}

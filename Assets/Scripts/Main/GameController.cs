@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour {
 
+    public bool DEBUGGING_MODE = false;
+
     public bool isThirdPersonCamera = false;
 
     [SerializeField] private Camera m_PlayerCamera;
@@ -33,9 +35,12 @@ public class GameController : MonoBehaviour {
     void Start () {
 
         //Get client
-        client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
-        gameManager = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<IngameManager>();
-        isThirdPersonCamera = gameManager.is3rdCam;
+        if (!DEBUGGING_MODE)
+        {
+            client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
+            gameManager = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<IngameManager>();
+            isThirdPersonCamera = gameManager.is3rdCam;
+        }
         //Set camera mode(FPS or TPS)
         if (isThirdPersonCamera)
         {
@@ -53,20 +58,24 @@ public class GameController : MonoBehaviour {
         }
 
         //Start check message sending corouting
-        StartCoroutine(client.SendCheck());
+        if(!DEBUGGING_MODE) StartCoroutine(client.SendCheck());
 
         //Load Map (Game Scene)
-        StartCoroutine(LoadGameScene(gameManager.mapList[gameManager.mapNumber]));
+        if (DEBUGGING_MODE)
+            StartCoroutine(LoadGameScene("Zombie1"));
+        else
+            StartCoroutine(LoadGameScene(gameManager.mapList[gameManager.mapNumber]));
 
         //Load other players
-        foreach (ClientInfo ci in client.clients)
-        {
-            if (ci.name == client.playerName) continue;
-            GameObject newPlayer = Instantiate(playerCharPrefab);
-            OtherCharacter oc = newPlayer.GetComponent<OtherCharacter>();
-            oc.playerName = ci.name;
-            oc.playerIdentification = ci.identification;
-        }
+        if(!DEBUGGING_MODE)
+            foreach (ClientInfo ci in client.clients)
+            {
+                if (ci.name == client.playerName) continue;
+                GameObject newPlayer = Instantiate(playerCharPrefab);
+                OtherCharacter oc = newPlayer.GetComponent<OtherCharacter>();
+                oc.playerName = ci.name;
+                oc.playerIdentification = ci.identification;
+            }
     }
     /// <summary>
     /// Game scene(map) load method (Coroutine)
@@ -89,7 +98,17 @@ public class GameController : MonoBehaviour {
         yield return new WaitForSeconds(2f);
 
         //Send 'Loading done' message to server
-        client.SendData(NetCommand.LoadGame, "True");
+        if(DEBUGGING_MODE)
+        {
+            isGameStart = true;
+            m_pnLoadingBG.SetActive(false);
+            m_pnIngameUI.SetActive(true);
+            m_fpsCtrl.enabled = true;
+            m_fpsCtrl.gameObject.GetComponent<Rigidbody>().useGravity = true;
+            m_fpsCtrl.transform.position = new Vector3(m_fpsCtrl.transform.position.x, 10, m_fpsCtrl.transform.position.z);
+            print("Game start");
+        }
+        else client.SendData(NetCommand.LoadGame, "True");
     }
 
 
@@ -125,24 +144,25 @@ public class GameController : MonoBehaviour {
     //FixedUpdate
     void FixedUpdate()
     {
-        if (client.isGamePlaying)
-        {
-            //Start Game!!
-            if (!isGameStart)
+        if(!DEBUGGING_MODE)
+            if (client.isGamePlaying)
             {
-                isGameStart = true;
-                m_pnLoadingBG.SetActive(false);
-                m_pnIngameUI.SetActive(true);
-                m_fpsCtrl.enabled = true;
-                m_fpsCtrl.gameObject.GetComponent<Rigidbody>().useGravity = true;
-                m_fpsCtrl.transform.position = new Vector3(m_fpsCtrl.transform.position.x, 10, m_fpsCtrl.transform.position.z);
-                print("Game start");
-            }
+                //Start Game!!
+                if (!isGameStart)
+                {
+                    isGameStart = true;
+                    m_pnLoadingBG.SetActive(false);
+                    m_pnIngameUI.SetActive(true);
+                    m_fpsCtrl.enabled = true;
+                    m_fpsCtrl.gameObject.GetComponent<Rigidbody>().useGravity = true;
+                    m_fpsCtrl.transform.position = new Vector3(m_fpsCtrl.transform.position.x, 10, m_fpsCtrl.transform.position.z);
+                    print("Game start");
+                }
 
-            //Send player's control
-            if (client != null) client.SendPlayerControl();
-            //Get informations from client instance
-            ///////////
-        }
+                //Send player's control
+                if (client != null) client.SendPlayerControl();
+                //Get informations from client instance
+                ///////////
+            }
     }
 }
