@@ -2310,7 +2310,6 @@ MonoBehaviour:
   is3rdCam: 0
   mapList:
   - Zombie1
-  - Zombie1aaa
 --- !u!1 &1968955882
 GameObject:
   m_ObjectHideFlags: 0

@@ -139,7 +139,7 @@ public class Server : MonoBehaviour {
                     //send every player to chat message
                     foreach (ClientInfo c in clients)
                     {
-                       if (c.ep.Equals(epSender)) continue;
+                       //if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
