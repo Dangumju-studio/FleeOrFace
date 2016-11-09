@@ -19,6 +19,7 @@ public class OtherCharacter : MonoBehaviour {
     PlayerState playerState;
 
     Client client;
+    ClientInfo clientInfo;
 
     Animator m_animator;
     [SerializeField] GameObject zombie, human;
@@ -33,32 +34,39 @@ public class OtherCharacter : MonoBehaviour {
         //Get client
         client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
         m_animator = zombie.GetComponent<Animator>();
+        clientInfo = client.clients.Find(cc => cc.name.Equals(playerName) && cc.identification.Equals(playerIdentification));
+
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update () {
         //Get position/rotation from server
-        ClientInfo c = client.clients.Find(cc => cc.name.Equals(playerName) && cc.identification.Equals(playerIdentification));
-        if(c == null)
+        if(clientInfo == null)
         {
             Destroy(this.gameObject);
             return;
         }
-        playerState = c.userState;
+        try
+        {
+            playerState = clientInfo.userState;
 
-        oldPos = gameObject.transform.position;
-        gameObject.transform.position = c.userPosition;
-        gameObject.transform.rotation = c.userRotation;
+            oldPos = gameObject.transform.position;
+            gameObject.transform.position = clientInfo.userPosition;
+            gameObject.transform.rotation = clientInfo.userRotation;
 
-        //Set animation's variables by player's velocity, etc.
-        m_animator.SetBool("OnGround", c.userIsOnGround);
-        float velX, velZ;
-        velX = Mathf.Lerp(oldVelX, -(oldPos.x - gameObject.transform.position.x), 0.8f);
-        velZ = Mathf.Lerp(oldVelZ, -(oldPos.z - gameObject.transform.position.z), 0.8f);
-        oldVelX = velX; oldVelZ = velZ;
-        m_animator.SetFloat("Side", velX / Time.deltaTime);
-        m_animator.SetFloat("Forward", velZ / Time.deltaTime);
+            //Set animation's variables by player's velocity, etc.
+            m_animator.SetBool("OnGround", clientInfo.userIsOnGround);
+            float velX, velZ;
+            velX = Mathf.Lerp(oldVelX, -(oldPos.x - gameObject.transform.position.x), 0.8f);
+            velZ = Mathf.Lerp(oldVelZ, -(oldPos.z - gameObject.transform.position.z), 0.8f);
+            oldVelX = velX; oldVelZ = velZ;
+            m_animator.SetFloat("Side", velX / Time.deltaTime);
+            m_animator.SetFloat("Forward", velZ / Time.deltaTime);
 
-        FlashObj.SetActive(c.userIsFlashOn);
+            FlashObj.SetActive(clientInfo.userIsFlashOn);
+        } catch
+        {
+
+        }
     }
 }

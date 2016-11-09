@@ -10,8 +10,13 @@ public class GameController : MonoBehaviour {
 
     public bool isThirdPersonCamera = false;
 
-    [SerializeField] private Camera m_PlayerCamera;
+    [SerializeField] private GameObject m_PlayerCamera;
     [SerializeField] private UnityStandardAssets.Characters.FirstPerson.FirstPersonController m_fpsCtrl;
+
+    #region player modeling objects
+    [SerializeField] GameObject zombieObj, zombieFPSObj;
+    [SerializeField] GameObject humanObj, humanFPSObj;
+    #endregion
 
     #region Canvas Gameobjects
     [SerializeField] private Image m_imgLoading;
@@ -22,13 +27,21 @@ public class GameController : MonoBehaviour {
     Client client;
     IngameManager gameManager;
     
+    /// <summary>
+    /// Other player's object prefab
+    /// </summary>
     [SerializeField] GameObject playerCharPrefab;
+
+    /// <summary>
+    /// Flash on/off
+    /// </summary>
     bool isFlashOn = false;
     [SerializeField] GameObject FlashObj;
 
     //StringBuilder for Position and Rotation
     StringBuilder sbPosRot = new StringBuilder();
 
+    //Game start?
     bool isGameStart = false;
 
     // Use this for initialization
@@ -47,6 +60,8 @@ public class GameController : MonoBehaviour {
             m_fpsCtrl.m_UseHeadBob = false;
             m_PlayerCamera.transform.localPosition = new Vector3(0, 2, -2.5f);
             m_PlayerCamera.transform.localRotation = Quaternion.Euler(30, 0, 0);
+            OVRManager.instance.gameObject.GetComponent<OVRCameraRig>().enabled = false;
+            OVRManager.instance.enabled = false;
 
         }
         else {
@@ -76,6 +91,8 @@ public class GameController : MonoBehaviour {
                 oc.playerName = ci.name;
                 oc.playerIdentification = ci.identification;
             }
+
+        
     }
     /// <summary>
     /// Game scene(map) load method (Coroutine)
@@ -111,7 +128,9 @@ public class GameController : MonoBehaviour {
         else client.SendData(NetCommand.LoadGame, "True");
     }
 
-
+    /// <summary>
+    /// Wait while attack motion ends
+    /// </summary>
     bool attackAvailable = true;
 	// Update is called once per frame
 	void Update () {
@@ -129,17 +148,31 @@ public class GameController : MonoBehaviour {
         if(client != null) client.positionRotation = sbPosRot.ToString();
 
         //Update attack value
-        float attack = CrossPlatformInputManager.GetAxis("Fire1");
-        if(attack > 0) {
+        if(CrossPlatformInputManager.GetButtonDown("Attack")) {
+            
             if (attackAvailable)
             {
                 if(client != null) client.attack = true;
                 attackAvailable = false;
+                StartCoroutine(AttackEnd());
             }
         }
-        if (attack <= 0) { attackAvailable = true; if (client != null) client.attack = false; }
 
+        //Flash Control
+        if(CrossPlatformInputManager.GetButtonDown("Flash"))
+        {
+            isFlashOn = !isFlashOn;
+            FlashObj.SetActive(isFlashOn);
         }
+    }
+    /// <summary>
+    /// Wait until Attack animation end
+    /// </summary>
+    IEnumerator AttackEnd()
+    {
+        yield return new WaitForSeconds(0.3f);
+        attackAvailable = true;
+    }
 
     //FixedUpdate
     void FixedUpdate()
@@ -161,8 +194,7 @@ public class GameController : MonoBehaviour {
 
                 //Send player's control
                 if (client != null) client.SendPlayerControl();
-                //Get informations from client instance
-                ///////////
+                //Get informations from client instance -> processed in "OtherCharacter" class component of each players' gameobject.
             }
     }
 }
