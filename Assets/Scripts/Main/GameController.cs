@@ -22,6 +22,12 @@ public class GameController : MonoBehaviour {
     [SerializeField] private Image m_imgLoading;
     [SerializeField] private GameObject m_pnLoadingBG;
     [SerializeField] private GameObject m_pnIngameUI;
+    [SerializeField] private GameObject m_pnESCMenu;
+    [SerializeField] private GameObject m_pnBackToMain;
+    [SerializeField] private GameObject m_pnExitToDesktop;
+
+    [SerializeField] private Text txtPlayerStatus;
+    [SerializeField] private Text txtRotateLeftTime;
     #endregion
 
     Client client;
@@ -43,6 +49,9 @@ public class GameController : MonoBehaviour {
 
     //Game start?
     bool isGameStart = false;
+
+    //is Pause?
+    public bool isPause = false;
 
     // Use this for initialization
     void Start () {
@@ -92,7 +101,11 @@ public class GameController : MonoBehaviour {
                 oc.playerIdentification = ci.identification;
             }
 
-        
+        //Hide all menu
+        m_pnESCMenu.SetActive(false);
+        m_pnBackToMain.SetActive(false);
+        m_pnExitToDesktop.SetActive(false);
+
     }
     /// <summary>
     /// Game scene(map) load method (Coroutine)
@@ -164,6 +177,24 @@ public class GameController : MonoBehaviour {
             isFlashOn = !isFlashOn;
             FlashObj.SetActive(isFlashOn);
         }
+
+        //ESC Menu Control
+        if(CrossPlatformInputManager.GetButtonDown("Cancel"))
+        {
+            
+            //else
+            if(!isPause)
+            {
+                isPause = true;
+                m_fpsCtrl.m_isPause = isPause;
+                m_pnESCMenu.SetActive(true);
+                m_pnBackToMain.SetActive(false);
+                m_pnExitToDesktop.SetActive(false);
+                Cursor.visible = true;
+            }
+        }
+        //Cursor.visible = isPause;
+
     }
     /// <summary>
     /// Wait until Attack animation end
@@ -194,7 +225,44 @@ public class GameController : MonoBehaviour {
 
                 //Send player's control
                 if (client != null) client.SendPlayerControl();
+
                 //Get informations from client instance -> processed in "OtherCharacter" class component of each players' gameobject.
             }
     }
+
+    #region ESC Menu buttons
+    public void btnResume_Clicked()
+    {
+        m_pnESCMenu.SetActive(false);
+        isPause = false;
+        m_fpsCtrl.m_isPause = isPause;
+        Cursor.visible = false;
+    }
+    public void btnBackToMain_Clicked()
+    {
+        m_pnESCMenu.SetActive(false);
+        m_pnBackToMain.SetActive(true);
+    }
+    public void btnExitToDesktop_Clicked()
+    {
+        m_pnESCMenu.SetActive(false);
+        m_pnExitToDesktop.SetActive(true);
+    }
+    public void btnBackToMainYes_Clicked()
+    {
+        client.SendData(NetCommand.Disconnect, "");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("menu");
+    }
+    public void btnExitToDesktopYes_Clicked()
+    {
+        client.SendData(NetCommand.Disconnect, "");
+        Application.Quit();
+    }
+    public void btnCancel_Clicked()
+    {
+        m_pnBackToMain.SetActive(false);
+        m_pnExitToDesktop.SetActive(false);
+        m_pnESCMenu.SetActive(true);
+    }
+    #endregion
 }

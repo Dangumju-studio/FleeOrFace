@@ -204,6 +204,9 @@ public class Server : MonoBehaviour {
                     {
                         if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+
+                        //Attack - Kill check
+                        ////////////
                     }
                     break;
                 //Moving/Turning

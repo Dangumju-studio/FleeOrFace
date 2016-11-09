@@ -59,10 +59,12 @@ public class IngameManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Set role to players zombie or human
+    /// Set role to players zombie or human.
+    /// Only called from Server.
     /// </summary>
-    void DistributeRole()
+    public void DistributeRole()
     {
+        if (!server.isServerOpened) return;
         int half = server.clients.Count / 2;
         for (int i = 0; i < server.clients.Count; i++)
         {

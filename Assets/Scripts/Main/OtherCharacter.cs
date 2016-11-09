@@ -62,7 +62,8 @@ public class OtherCharacter : MonoBehaviour {
             oldVelX = velX; oldVelZ = velZ;
             m_animator.SetFloat("Side", velX / Time.deltaTime);
             m_animator.SetFloat("Forward", velZ / Time.deltaTime);
-
+            
+            m_animator.SetTrigger("OnAttack");
             FlashObj.SetActive(clientInfo.userIsFlashOn);
         } catch
         {
