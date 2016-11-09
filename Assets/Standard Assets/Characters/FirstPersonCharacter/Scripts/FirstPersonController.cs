@@ -138,8 +138,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
             ProgressStepCycle(speed);
             UpdateCameraPosition(speed);
 
-            if(!m_isPause)
-                m_MouseLook.UpdateCursorLock();
+            if (m_isPause)
+                m_MouseLook.SetCursorLock(false);
+            else
+                m_MouseLook.SetCursorLock(true);
         }
 
 
