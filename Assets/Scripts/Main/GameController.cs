@@ -225,7 +225,7 @@ public class GameController : MonoBehaviour {
 
                 //Send player's control
                 if (client != null) client.SendPlayerControl();
-
+                
                 //Get informations from client instance -> processed in "OtherCharacter" class component of each players' gameobject.
             }
     }
