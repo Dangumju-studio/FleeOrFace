@@ -3,6 +3,7 @@ using System.Collections;
 
 public class WaterManager : MonoBehaviour {
     public GameObject water;
+    public GameObject wind;
     // Use this for initialization
     public bool playerwaterin = false;
 	void Start () {
@@ -19,10 +20,17 @@ public class WaterManager : MonoBehaviour {
         if (col.tag == "Player")
         {          
             water.GetComponent<AudioSource>().Play();
+            wind.GetComponent<AudioSource>().Stop();
         }
-        else
+        
+    }
+    public void OnTriggerExit(Collider col)
+    {
+        if (col.tag == "Player")
         {
             water.GetComponent<AudioSource>().Stop();
+            wind.GetComponent<AudioSource>().Play();
         }
+
     }
 }
