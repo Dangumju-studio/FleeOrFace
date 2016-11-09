@@ -51,6 +51,10 @@ public class ClientInfo
     /// </summary>
     public bool userIsFlashOn;
     /// <summary>
+    /// User Attack. (When this true, this will change to false immediately and Character will attack.)
+    /// </summary>
+    public bool userIsAttack;
+    /// <summary>
     /// Player state (dead, zombie, human, none)
     /// </summary>
     public PlayerState userState;
@@ -70,6 +74,7 @@ public class ClientInfo
         userRotation = Quaternion.identity;
         userIsOnGround = true;
         userIsFlashOn = false;
+        userIsAttack = false;
         userState = PlayerState.None;
     }
     public ClientInfo(string name, string identification, bool isReady = false)
@@ -85,6 +90,7 @@ public class ClientInfo
         userRotation = Quaternion.identity;
         userIsOnGround = true;
         userIsFlashOn = false;
+        userIsAttack = false;
         userState = PlayerState.None;
     }
 }

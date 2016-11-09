@@ -47,6 +47,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public Animator m_Animator;
         public Animator m_Animator_fps;
 
+        public bool m_isPause;
+
         // Use this for initialization
         private void Start()
         {
@@ -60,6 +62,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera_wrapper.transform);
+            m_isPause = false;
            
         }
 
@@ -67,7 +70,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         // Update is called once per frame
         private void Update()
         {
-            RotateView();
+            if(!m_isPause) RotateView();
             // the jump state needs to read here to make sure it is not missed
             if (!m_Jump)
             {
@@ -99,8 +102,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void FixedUpdate()
         {
-            float speed;
-            GetInput(out speed);
+            float speed = 0;
+            if(!m_isPause) GetInput(out speed);
             // always move along the camera forward as it is the direction that it being aimed at
             Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
 
@@ -135,7 +138,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
             ProgressStepCycle(speed);
             UpdateCameraPosition(speed);
 
-            m_MouseLook.UpdateCursorLock();
+            if(!m_isPause)
+                m_MouseLook.UpdateCursorLock();
         }
 
 

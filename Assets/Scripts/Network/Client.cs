@@ -17,6 +17,11 @@ public class Client : MonoBehaviour {
     public bool isLoadingStarting = false;
     public bool isGamePlaying = false;
 
+    /// <summary>
+    /// Player state (none, zombie, human, dead)
+    /// </summary>
+    public PlayerState userState = PlayerState.None;
+
     IngameManager gameManager;
 
     /// <summary>
@@ -149,6 +154,7 @@ public class Client : MonoBehaviour {
                     //remove ClientInfo in ClientList(clients) if it had removed from server.
                     for(int i=0; i < clients.Count; i++)
                     {
+                        //find current clientinfo in server's message. if it doesn't exist, remove this clientinfo.
                         if (Array.Find<string>(players, s => s.Substring(0, s.LastIndexOf(':')).Equals(string.Format("{0}:{1}", clients[i].name, clients[i].identification))) == null)
                             clients.RemoveAt(i--);
                     }
@@ -191,6 +197,11 @@ public class Client : MonoBehaviour {
                     break;
 
                 case NetCommand.Attack:
+                    cInfo = clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify);
+                    if(cInfo != null)
+                    {
+                        cInfo.userIsAttack = true;
+                    }
 
                     break;
             }
