@@ -167,29 +167,29 @@ namespace UnityStandardAssets.Water
 
 
         // Cleanup all the objects we possibly have created
-        void OnDisable()
-        {
-            if (m_ReflectionTexture)
-            {
-                DestroyImmediate(m_ReflectionTexture);
-                m_ReflectionTexture = null;
-            }
-            if (m_RefractionTexture)
-            {
-                DestroyImmediate(m_RefractionTexture);
-                m_RefractionTexture = null;
-            }
-            foreach (var kvp in m_ReflectionCameras)
-            {
-                DestroyImmediate((kvp.Value).gameObject);
-            }
-            m_ReflectionCameras.Clear();
-            foreach (var kvp in m_RefractionCameras)
-            {
-                DestroyImmediate((kvp.Value).gameObject);
-            }
-            m_RefractionCameras.Clear();
-        }
+        //void OnDisable()
+        //{
+        //    if (m_ReflectionTexture)
+        //    {
+        //        DestroyImmediate(m_ReflectionTexture);
+        //        m_ReflectionTexture = null;
+        //    }
+        //    if (m_RefractionTexture)
+        //    {
+        //        DestroyImmediate(m_RefractionTexture);
+        //        m_RefractionTexture = null;
+        //    }
+        //    foreach (var kvp in m_ReflectionCameras)
+        //    {
+        //        DestroyImmediate((kvp.Value).gameObject);
+        //    }
+        //    m_ReflectionCameras.Clear();
+        //    foreach (var kvp in m_RefractionCameras)
+        //    {
+        //        DestroyImmediate((kvp.Value).gameObject);
+        //    }
+        //    m_RefractionCameras.Clear();
+        //}
 
 
         // This just sets up some matrices in the material; for really
