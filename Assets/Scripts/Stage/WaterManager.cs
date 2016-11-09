@@ -14,11 +14,15 @@ public class WaterManager : MonoBehaviour {
 	
 	}
 
-    void OnTiriggerEnter(Collider col)
+    public void OnTriggerEnter(Collider col)
     {
         if (col.tag == "Player")
-        {
+        {          
             water.GetComponent<AudioSource>().Play();
+        }
+        else
+        {
+            water.GetComponent<AudioSource>().Stop();
         }
     }
 }
