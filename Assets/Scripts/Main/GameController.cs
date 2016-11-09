@@ -32,6 +32,7 @@ public class GameController : MonoBehaviour {
 
     Client client;
     IngameManager gameManager;
+    PlayerState playerState;
     
     /// <summary>
     /// Other player's object prefab
@@ -160,6 +161,41 @@ public class GameController : MonoBehaviour {
         //Push position and rotation value
         if(client != null) client.positionRotation = sbPosRot.ToString();
 
+        //Update role rotation time, player's role
+        if(client != null) { 
+            txtRotateLeftTime.text = client.rotateTimeLeft.ToString();
+            if (client.userState != playerState)
+            {
+                playerState = client.userState;
+                switch (playerState)
+                {
+                    case PlayerState.Human:
+                        humanObj.SetActive(true);
+                        humanFPSObj.SetActive(true);
+                        zombieObj.SetActive(false);
+                        zombieFPSObj.SetActive(false);
+                        m_fpsCtrl.m_Animator = humanObj.GetComponent<Animator>();
+                        m_fpsCtrl.m_Animator_fps = humanFPSObj.GetComponent<Animator>();
+                        txtPlayerStatus.text = "You are the human..";
+                        break;
+                    case PlayerState.Zombie:
+                        zombieObj.SetActive(true);
+                        zombieFPSObj.SetActive(true);
+                        humanObj.SetActive(false);
+                        humanFPSObj.SetActive(false);
+                        m_fpsCtrl.m_Animator = zombieObj.GetComponent<Animator>();
+                        m_fpsCtrl.m_Animator_fps = zombieFPSObj.GetComponent<Animator>();
+                        txtPlayerStatus.text = "You are the zombie..";
+                        break;
+                    case PlayerState.Dead:
+                        //DEATH EFFECT
+
+                        //FREE CAM MODE
+                        break;
+                }
+            }
+        }
+
         //Update attack value
         if(CrossPlatformInputManager.GetButtonDown("Attack")) {
             
@@ -181,8 +217,6 @@ public class GameController : MonoBehaviour {
         //ESC Menu Control
         if(CrossPlatformInputManager.GetButtonDown("Cancel"))
         {
-            
-            //else
             if(!isPause)
             {
                 isPause = true;
@@ -193,8 +227,6 @@ public class GameController : MonoBehaviour {
                 Cursor.visible = true;
             }
         }
-        //Cursor.visible = isPause;
-
     }
     /// <summary>
     /// Wait until Attack animation end
@@ -220,6 +252,10 @@ public class GameController : MonoBehaviour {
                     m_fpsCtrl.enabled = true;
                     m_fpsCtrl.gameObject.GetComponent<Rigidbody>().useGravity = true;
                     m_fpsCtrl.transform.position = new Vector3(m_fpsCtrl.transform.position.x, 10, m_fpsCtrl.transform.position.z);
+
+                    //role rotation timer start!!
+                    
+                    StartCoroutine(gameManager.RotatePlayerRoleTimer());
                     print("Game start");
                 }
 
@@ -265,4 +301,20 @@ public class GameController : MonoBehaviour {
         m_pnESCMenu.SetActive(true);
     }
     #endregion
+
+    void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            if (!isPause)
+            {
+                isPause = true;
+                m_fpsCtrl.m_isPause = isPause;
+                m_pnESCMenu.SetActive(true);
+                m_pnBackToMain.SetActive(false);
+                m_pnExitToDesktop.SetActive(false);
+                Cursor.visible = true;
+            }
+        }
+    }
 }

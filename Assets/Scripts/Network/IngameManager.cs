@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class IngameManager : MonoBehaviour {
 
     bool _isGamePlaying;
-    bool isGamePlaying
+    public bool isGamePlaying
     {
         get { return _isGamePlaying; }
         set { _isGamePlaying = value; }
@@ -58,14 +58,16 @@ public class IngameManager : MonoBehaviour {
     public bool Initialize()
     {
         try
-        {
+        { 
             //Zombie or Human
             DistributeRole();
             //Set each player's position and rotation
 
+            //Role rotate timer start => in GameController.cs FixedUpdate() gamestart part. (cross thread..)
         }
-        catch
+        catch (System.Exception e)
         {
+            print(e.Message);
             return false;
         }
         return true;
@@ -77,37 +79,55 @@ public class IngameManager : MonoBehaviour {
     /// </summary>
     public void DistributeRole()
     {
+        print("role distribute start");
         if (!server.isServerOpened) return;
         int half = server.clients.Count / 2;
         for (int i = 0; i < server.clients.Count; i++)
         {
-            if (i <= half) server.clients[i].userState = PlayerState.Zombie;
-            else server.clients[i].userState = PlayerState.Human;
+            if (i < half) server.clients[i].userState = PlayerState.Human;
+            else server.clients[i].userState = PlayerState.Zombie;
         }
-        //mix
-        for (int i = 0; i < server.clients.Count; i++)
+        //mix(shuffle)
+        System.Random rnd = new System.Random();
+        int n = server.clients.Count;
+        while(n>1)
         {
-            int changeTarget = Random.Range(0, server.clients.Count);
-            PlayerState tmp = server.clients[i].userState;
-            server.clients[i].userState = server.clients[changeTarget].userState;
-            server.clients[changeTarget].userState = tmp;
+            n--;
+            int k = rnd.Next(n + 1);
+            int ps = (int)server.clients[k].userState;
+            server.clients[k].userState = (PlayerState)((int)server.clients[n].userState);
+            server.clients[n].userState = (PlayerState)ps;
         }
+
+        //Send role information to clients
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        foreach(ClientInfo ci in server.clients)
+            sb.AppendFormat("{0}:{1},", ci.identification, (int)ci.userState);
+        server.NoticeData(NetCommand.RoleRotate, sb.ToString());
 
         lastRotatedTime = System.DateTime.Now;
-        rotateTimeTerm = Random.Range(10, 35);
+        rotateTimeTerm = rnd.Next(10, 35);
     }
 
-    IEnumerator rotatePlayerRole()
+    /// <summary>
+    /// Players role rotation timer / DistributeRole caller.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator RotatePlayerRoleTimer()
     {
-        while(isGamePlaying)
-        {
-            yield return new WaitForSeconds(0.5f);
+        if(server.isServerOpened)
+            while(isGamePlaying)
+            {
+                yield return new WaitForSeconds(0.5f);
 
-            int between = (lastRotatedTime - System.DateTime.Now).Seconds;
-            rotateTimeLeft = rotateTimeTerm - between;
+                int between = (System.DateTime.Now - lastRotatedTime).Seconds;
+                rotateTimeLeft = rotateTimeTerm - between;
 
-            //Current role time out. Rotate role again.
-            if (rotateTimeTerm < 0) DistributeRole();
-        }
+                //Send time information to clients
+                server.NoticeData(NetCommand.TimeCount, rotateTimeLeft.ToString());
+
+                //Current role time out. Rotate role again.
+                if (rotateTimeLeft < 0) DistributeRole();
+            }
     }
 }

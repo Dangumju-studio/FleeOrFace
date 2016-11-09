@@ -41,14 +41,37 @@ public class OtherCharacter : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         //Get position/rotation from server
-        if(clientInfo == null)
+        if(clientInfo == null || !clientInfo.isConnected)
         {
+            print(playerName + " disconnected");
             Destroy(this.gameObject);
             return;
         }
         try
         {
-            playerState = clientInfo.userState;
+            //playerState
+            if(playerState != clientInfo.userState)
+            {
+                playerState = clientInfo.userState;
+                switch (playerState)
+                {
+                    case PlayerState.Human:
+                        human.SetActive(true);
+                        zombie.SetActive(false);
+                        m_animator = human.GetComponent<Animator>();
+                        break;
+                    case PlayerState.Zombie:
+                        zombie.SetActive(true);
+                        human.SetActive(false);
+                        m_animator = zombie.GetComponent<Animator>();
+                        break;
+                    case PlayerState.Dead:
+                        //DEATH EFFECT
+                        Destroy(this.gameObject);
+                        return;
+                        break;
+                }
+            }
 
             oldPos = gameObject.transform.position;
             gameObject.transform.position = clientInfo.userPosition;
@@ -70,9 +93,9 @@ public class OtherCharacter : MonoBehaviour {
             }
 
             FlashObj.SetActive(clientInfo.userIsFlashOn);
-        } catch
+        } catch (System.Exception e)
         {
-
+            print(e.Message);
         }
     }
 }

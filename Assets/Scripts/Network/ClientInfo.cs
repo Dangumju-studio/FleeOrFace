@@ -23,6 +23,10 @@ public class ClientInfo
     /// Last client connection checked time
     /// </summary>
     public DateTime lastCheck;
+    /// <summary>
+    /// Connection state.
+    /// </summary>
+    public bool isConnected;
 
     /// <summary>
     /// Ready state
@@ -68,6 +72,7 @@ public class ClientInfo
         ep = null;
         name = "";
         lastCheck = DateTime.Now;
+        isConnected = true;
         isReady = false;
         isLoadingDone = false;
         userPosition = Vector3.zero;
@@ -84,6 +89,7 @@ public class ClientInfo
         this.name = name;
         this.identification = identification;
         lastCheck = DateTime.Now;
+        isConnected = true;
         this.isReady = isReady;
         isLoadingDone = false;
         userPosition = Vector3.zero;
