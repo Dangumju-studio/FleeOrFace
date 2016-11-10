@@ -26,6 +26,8 @@ public class OtherCharacter : MonoBehaviour {
 
     [SerializeField] GameObject FlashObj;
 
+    [SerializeField] TextMesh txtName;
+
     Vector3 oldPos;
     float oldVelX, oldVelZ;
 
@@ -36,19 +38,44 @@ public class OtherCharacter : MonoBehaviour {
         m_animator = zombie.GetComponent<Animator>();
         clientInfo = client.clients.Find(cc => cc.name.Equals(playerName) && cc.identification.Equals(playerIdentification));
 
+        //Player name
+        txtName.text = playerName;
     }
 
     // Update is called once per frame
     void Update () {
         //Get position/rotation from server
-        if(clientInfo == null)
+        if(clientInfo == null || !clientInfo.isConnected)
         {
+            print(playerName + " disconnected");
             Destroy(this.gameObject);
             return;
         }
         try
         {
-            playerState = clientInfo.userState;
+            //playerState
+            if(playerState != clientInfo.userState)
+            {
+                playerState = clientInfo.userState;
+                switch (playerState)
+                {
+                    case PlayerState.Human:
+                        human.SetActive(true);
+                        zombie.SetActive(false);
+                        m_animator = human.GetComponent<Animator>();
+                        break;
+                    case PlayerState.Zombie:
+                        zombie.SetActive(true);
+                        human.SetActive(false);
+                        m_animator = zombie.GetComponent<Animator>();
+                        break;
+                    case PlayerState.Dead:
+                        //DEATH EFFECT
+                        Destroy(this.gameObject);
+                        return;
+                        break;
+                }
+            }
 
             oldPos = gameObject.transform.position;
             gameObject.transform.position = clientInfo.userPosition;
@@ -69,10 +96,14 @@ public class OtherCharacter : MonoBehaviour {
                 clientInfo.userIsAttack = false;
             }
 
+            //Flash on/off
             FlashObj.SetActive(clientInfo.userIsFlashOn);
-        } catch
-        {
 
+            //Player name rotation
+            txtName.gameObject.transform.LookAt(Camera.main.transform);
+        } catch (System.Exception e)
+        {
+            print(e.Message);
         }
     }
 }

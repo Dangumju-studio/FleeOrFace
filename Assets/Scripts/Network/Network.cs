@@ -49,7 +49,19 @@ public enum NetCommand
         /// <summary>
         /// Some player's attack flag data
         /// </summary>
-        Attack
+        Attack,
+        /// <summary>
+        /// Role rotation time left count changed message
+        /// </summary>
+        TimeCount,
+        /// <summary>
+        /// When role rotated.
+        /// </summary>
+        RoleRotate,
+        /// <summary>
+        /// When game over.
+        /// </summary>
+        Gameover
     }
 
 public enum PlayerState { Dead, Zombie, Human, None}
@@ -72,7 +84,7 @@ public class NetworkData
         cmd = NetCommand.Null;
         msg = string.Empty;
         name = string.Empty;
-        identify = null;
+        identify = string.Empty;
     }
     /// <summary>
     /// Initialize NetworkData from byte array

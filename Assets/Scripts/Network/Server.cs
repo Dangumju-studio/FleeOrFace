@@ -15,7 +15,7 @@ public class Server : MonoBehaviour {
     public List<ClientInfo> clients = new List<ClientInfo>();
     byte[] bData = new byte[1024];
 
-    const int CLIENT_TIMEOUT = 30;
+    const int CLIENT_TIMEOUT = 15;
 
     IngameManager gameManager;
 
@@ -111,7 +111,9 @@ public class Server : MonoBehaviour {
                 //When player disconnected
                 case NetCommand.Disconnect:
                     //remove player
-                        clients.Remove(clients.Find(c => c.ep.Equals(epSender)));
+                    int removedIdx = clients.FindIndex(c => c.ep.Equals(epSender));
+                    clients[removedIdx].isConnected = false;
+                    clients.RemoveAt(removedIdx);
                     //send every player to this player's connection state
                     foreach (ClientInfo c in clients)
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
@@ -172,7 +174,6 @@ public class Server : MonoBehaviour {
                         cInfo = clients.Find(c => c.isReady == false);
                         if (cInfo == null)
                         {
-                            gameManager.Initialize();
                             dataToSend.cmd = NetCommand.LoadGame;
                             dataToSend.msg = "";
                             msg = dataToSend.ConvertToByte();
@@ -190,6 +191,8 @@ public class Server : MonoBehaviour {
                     cInfo = clients.Find(c => c.isLoadingDone == false);
                     if (cInfo == null)
                     {
+                        gameManager.isGamePlaying = true;
+                        gameManager.Initialize();
                         dataToSend.cmd = NetCommand.StartGame;
                         dataToSend.msg = "";
                         msg = dataToSend.ConvertToByte();
@@ -270,5 +273,20 @@ public class Server : MonoBehaviour {
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Notice message
+    /// </summary>
+    /// <param name="cmd"></param>
+    /// <param name="msg"></param>
+    public void NoticeData(NetCommand cmd, string msg)
+    {
+        NetworkData newMessage = new NetworkData();
+        newMessage.cmd = cmd;
+        newMessage.msg = msg;
+        byte[] bData = newMessage.ConvertToByte();
+        foreach (ClientInfo c in clients)
+            udpServer.BeginSendTo(bData, 0, bData.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), null);
     }
 }

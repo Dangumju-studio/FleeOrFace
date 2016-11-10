@@ -17,6 +17,8 @@ public class Client : MonoBehaviour {
     public bool isLoadingStarting = false;
     public bool isGamePlaying = false;
 
+    const int SERVER_TIMEOUT = 15;
+
     /// <summary>
     /// Player state (none, zombie, human, dead)
     /// </summary>
@@ -43,6 +45,7 @@ public class Client : MonoBehaviour {
     /// When player push attack button, 'attack' variable turn to 'True'.
     /// </summary>
     public bool attack = false;
+    public int rotateTimeLeft = 0;
 
     byte[] bData = new byte[1024];
 
@@ -99,11 +102,12 @@ public class Client : MonoBehaviour {
             //Create Data refer to received byte array data
             NetworkData msgReceived = new NetworkData(bData);
             ClientInfo cInfo;
-            switch(msgReceived.cmd)
+            string[] values;
+            switch (msgReceived.cmd)
             {
                 case NetCommand.Connect:
                     //Connect success
-                    if(msgReceived.name == playerName && msgReceived.identify == identification)
+                    if( msgReceived.identify == identification)
                     {
                         isConnected = true;
                         SendData(NetCommand.Check, "");
@@ -120,12 +124,14 @@ public class Client : MonoBehaviour {
                     break;
 
                 case NetCommand.Disconnect:
-                    if (msgReceived.name == playerName && msgReceived.identify == identification)
+                    if (msgReceived.identify == identification)
                         isConnected = false;
                     else
                     {
                         //Disconnect someone
-                        clients.Remove(clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify));
+                        int removedIdx = clients.FindIndex(c => c.identification == msgReceived.identify);
+                        clients[removedIdx].isConnected = false;
+                        clients.RemoveAt(removedIdx);
                         txtChatQueue.Enqueue(string.Format("{0} Leave..", msgReceived.name));
                     }
                     break;
@@ -136,7 +142,7 @@ public class Client : MonoBehaviour {
                     foreach(string s in players)
                     {
                         string[] pStr = s.Split(new char[] { ':' });
-                        ClientInfo ci = clients.Find(c => c.name.Equals(pStr[0]) && c.identification.Equals(pStr[1]));
+                        ClientInfo ci = clients.Find(c => c.identification.Equals(pStr[1]));
                         if (ci != null)
                         {
                             //modify
@@ -167,13 +173,13 @@ public class Client : MonoBehaviour {
                     break;
 
                 case NetCommand.MapSetting:
-                    string[] settingvalues = msgReceived.msg.Split(new char[] { ',' });
-                    gameManager.mapNumber = int.Parse(settingvalues[0]);
-                    gameManager.is3rdCam = bool.Parse(settingvalues[1]);
+                    values = msgReceived.msg.Split(new char[] { ',' });
+                    gameManager.mapNumber = int.Parse(values[0]);
+                    gameManager.is3rdCam = bool.Parse(values[1]);
                     break;
 
                 case NetCommand.Ready:
-                    cInfo = clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify);
+                    cInfo = clients.Find(c => c.identification == msgReceived.identify);
                     if (cInfo != null) cInfo.isReady = bool.Parse(msgReceived.msg);
                     break;
                 case NetCommand.LoadGame:
@@ -185,8 +191,8 @@ public class Client : MonoBehaviour {
                     break;
 
                 case NetCommand.PositionRotation:
-                    cInfo = clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify);
-                    string[] values = msgReceived.msg.Split(new char[] { ',' });
+                    cInfo = clients.Find(c => c.identification == msgReceived.identify);
+                    values = msgReceived.msg.Split(new char[] { ',' });
                     if(cInfo != null)
                     {
                         cInfo.userPosition = new Vector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
@@ -197,12 +203,28 @@ public class Client : MonoBehaviour {
                     break;
 
                 case NetCommand.Attack:
-                    cInfo = clients.Find(c => c.name == msgReceived.name && c.identification == msgReceived.identify);
+                    cInfo = clients.Find(c => c.identification == msgReceived.identify);
                     if(cInfo != null)
-                    {
                         cInfo.userIsAttack = true;
-                    }
 
+                    break;
+
+                case NetCommand.TimeCount:
+                    rotateTimeLeft = int.Parse(msgReceived.msg);
+                    break;
+
+                case NetCommand.RoleRotate:
+                    values = msgReceived.msg.Split(new char[] { ',' });
+                    foreach(string s in values)
+                    {
+                        string cur_identification = s.Substring(0, s.IndexOf(':'));
+                        int role = int.Parse(s.Substring(s.IndexOf(':') + 1, s.Length - s.IndexOf(':')-1));
+                        cInfo = clients.Find(c => c.identification == cur_identification);
+                        if (cInfo != null)
+                            cInfo.userState = (PlayerState)role;
+                        if (cur_identification == identification)
+                            userState = (PlayerState)role;
+                    }
                     break;
             }
 

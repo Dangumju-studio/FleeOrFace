@@ -25,13 +25,27 @@ public class GameController : MonoBehaviour {
     [SerializeField] private GameObject m_pnESCMenu;
     [SerializeField] private GameObject m_pnBackToMain;
     [SerializeField] private GameObject m_pnExitToDesktop;
+    [SerializeField] private GameObject m_pnGameOver;
 
     [SerializeField] private Text txtPlayerStatus;
     [SerializeField] private Text txtRotateLeftTime;
+    [SerializeField] private Text txtWinner;
+
+    //VR Canvas
+    [SerializeField] private GameObject m_pnVRCanvas;
+    [SerializeField] private Image m_imgVRLoading;
+    [SerializeField] private GameObject m_pnVRLoadingBG;
+    [SerializeField] private GameObject m_pnVRIngameUI;
+    [SerializeField] private GameObject m_pnVRESCMenu;
+    [SerializeField] private GameObject m_pnVRGameOver;
+    [SerializeField] private Text txtVRRotateLeftTime;
+    [SerializeField] private Text txtVRPlayerStatus;
+    [SerializeField] private Text txtVRWinner;
     #endregion
 
     Client client;
     IngameManager gameManager;
+    PlayerState playerState;
     
     /// <summary>
     /// Other player's object prefab
@@ -69,20 +83,26 @@ public class GameController : MonoBehaviour {
             m_fpsCtrl.m_UseHeadBob = false;
             m_PlayerCamera.transform.localPosition = new Vector3(0, 2, -2.5f);
             m_PlayerCamera.transform.localRotation = Quaternion.Euler(30, 0, 0);
+            //TPS -> Not using HMD
             OVRManager.instance.gameObject.GetComponent<OVRCameraRig>().enabled = false;
             OVRManager.instance.enabled = false;
-
+            m_pnVRCanvas.SetActive(false);
         }
         else {
-            if(!OVRManager.isHmdPresent)
+            //Not using HMD
+            if (!OVRManager.isHmdPresent)
             {
                 OVRManager.instance.gameObject.GetComponent<OVRCameraRig>().enabled = false;
                 OVRManager.instance.enabled = false;
+                m_pnVRCanvas.SetActive(false);
             }
         }
 
+        m_imgLoading.fillAmount = 0;
+        m_imgVRLoading.fillAmount = 0;
+
         //Start check message sending corouting
-        if(!DEBUGGING_MODE) StartCoroutine(client.SendCheck());
+        if (!DEBUGGING_MODE) StartCoroutine(client.SendCheck());
 
         //Load Map (Game Scene)
         if (DEBUGGING_MODE)
@@ -103,6 +123,9 @@ public class GameController : MonoBehaviour {
 
         //Hide all menu
         m_pnESCMenu.SetActive(false);
+        m_pnVRESCMenu.SetActive(false);
+        m_pnGameOver.SetActive(false);
+        m_pnVRGameOver.SetActive(false);
         m_pnBackToMain.SetActive(false);
         m_pnExitToDesktop.SetActive(false);
 
@@ -118,14 +141,16 @@ public class GameController : MonoBehaviour {
         while (!loadState.isDone)
         {
             m_imgLoading.fillAmount = loadState.progress;
+            m_imgVRLoading.fillAmount = loadState.progress;
             print("Map loading.." + loadState.progress);
             yield return null;
         }
         print("Map loaded");
 
         m_imgLoading.fillAmount = 1;
+        m_imgVRLoading.fillAmount = 1;
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
 
         //Send 'Loading done' message to server
         if(DEBUGGING_MODE)
@@ -133,6 +158,8 @@ public class GameController : MonoBehaviour {
             isGameStart = true;
             m_pnLoadingBG.SetActive(false);
             m_pnIngameUI.SetActive(true);
+            m_pnVRLoadingBG.SetActive(false);
+            m_pnVRIngameUI.SetActive(true);
             m_fpsCtrl.enabled = true;
             m_fpsCtrl.gameObject.GetComponent<Rigidbody>().useGravity = true;
             m_fpsCtrl.transform.position = new Vector3(m_fpsCtrl.transform.position.x, 10, m_fpsCtrl.transform.position.z);
@@ -157,8 +184,47 @@ public class GameController : MonoBehaviour {
             playerT.position.x, playerT.position.y, playerT.position.z,
             playerT.rotation.x, playerT.rotation.y, playerT.rotation.z, playerT.rotation.w,
             m_fpsCtrl.m_Animator.GetBool("OnGround"), isFlashOn);
+
         //Push position and rotation value
         if(client != null) client.positionRotation = sbPosRot.ToString();
+
+        //Update role rotation time, player's role
+        if(client != null) { 
+            txtRotateLeftTime.text = client.rotateTimeLeft.ToString();
+            txtVRRotateLeftTime.text = client.rotateTimeLeft.ToString();
+            if (client.userState != playerState)
+            {
+                playerState = client.userState;
+                switch (playerState)
+                {
+                    case PlayerState.Human:
+                        humanObj.SetActive(true);
+                        humanFPSObj.SetActive(true);
+                        zombieObj.SetActive(false);
+                        zombieFPSObj.SetActive(false);
+                        m_fpsCtrl.m_Animator = humanObj.GetComponent<Animator>();
+                        m_fpsCtrl.m_Animator_fps = humanFPSObj.GetComponent<Animator>();
+                        txtPlayerStatus.text = "You are the human..";
+                        txtVRPlayerStatus.text = "You are the human..";
+                        break;
+                    case PlayerState.Zombie:
+                        zombieObj.SetActive(true);
+                        zombieFPSObj.SetActive(true);
+                        humanObj.SetActive(false);
+                        humanFPSObj.SetActive(false);
+                        m_fpsCtrl.m_Animator = zombieObj.GetComponent<Animator>();
+                        m_fpsCtrl.m_Animator_fps = zombieFPSObj.GetComponent<Animator>();
+                        txtPlayerStatus.text = "You are the zombie..";
+                        txtVRPlayerStatus.text = "You are the zombie..";
+                        break;
+                    case PlayerState.Dead:
+                        //DEATH EFFECT
+
+                        //FREE CAM MODE
+                        break;
+                }
+            }
+        }
 
         //Update attack value
         if(CrossPlatformInputManager.GetButtonDown("Attack")) {
@@ -181,20 +247,17 @@ public class GameController : MonoBehaviour {
         //ESC Menu Control
         if(CrossPlatformInputManager.GetButtonDown("Cancel"))
         {
-            
-            //else
-            if(!isPause)
+            //if(!isPause)
             {
-                isPause = true;
+                isPause = !isPause;
                 m_fpsCtrl.m_isPause = isPause;
-                m_pnESCMenu.SetActive(true);
+                m_pnESCMenu.SetActive(isPause);
                 m_pnBackToMain.SetActive(false);
                 m_pnExitToDesktop.SetActive(false);
-                Cursor.visible = true;
+                m_pnVRESCMenu.SetActive(isPause);
+                Cursor.visible = isPause;
             }
         }
-        //Cursor.visible = isPause;
-
     }
     /// <summary>
     /// Wait until Attack animation end
@@ -220,6 +283,8 @@ public class GameController : MonoBehaviour {
                     m_fpsCtrl.enabled = true;
                     m_fpsCtrl.gameObject.GetComponent<Rigidbody>().useGravity = true;
                     m_fpsCtrl.transform.position = new Vector3(m_fpsCtrl.transform.position.x, 10, m_fpsCtrl.transform.position.z);
+                    //role rotation timer start!!
+                    StartCoroutine(gameManager.RotatePlayerRoleTimer());
                     print("Game start");
                 }
 
@@ -234,6 +299,7 @@ public class GameController : MonoBehaviour {
     public void btnResume_Clicked()
     {
         m_pnESCMenu.SetActive(false);
+        m_pnVRESCMenu.SetActive(false);
         isPause = false;
         m_fpsCtrl.m_isPause = isPause;
         Cursor.visible = false;
@@ -265,4 +331,20 @@ public class GameController : MonoBehaviour {
         m_pnESCMenu.SetActive(true);
     }
     #endregion
+
+    void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            if (!isPause)
+            {
+                isPause = true;
+                m_fpsCtrl.m_isPause = isPause;
+                m_pnESCMenu.SetActive(true);
+                m_pnBackToMain.SetActive(false);
+                m_pnExitToDesktop.SetActive(false);
+                Cursor.visible = true;
+            }
+        }
+    }
 }
