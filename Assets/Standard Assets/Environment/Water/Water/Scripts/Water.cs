@@ -23,6 +23,8 @@ namespace UnityStandardAssets.Water
         public LayerMask refractLayers = -1;
 
 
+
+
         private Dictionary<Camera, Camera> m_ReflectionCameras = new Dictionary<Camera, Camera>(); // Camera -> Camera table
         private Dictionary<Camera, Camera> m_RefractionCameras = new Dictionary<Camera, Camera>(); // Camera -> Camera table
         private RenderTexture m_ReflectionTexture;
@@ -35,8 +37,14 @@ namespace UnityStandardAssets.Water
 
         // This is called when it's known that the object will be rendered by some
         // camera. We render reflections / refractions and do other updates here.
-        // Because the script executes in edit mode, reflections for the scene view
-        // camera will just work!
+        // Because the script e
+        
+            
+            
+            
+            
+            
+            // camera will just work!
         public void OnWillRenderObject()
         {
             if (!enabled || !GetComponent<Renderer>() || !GetComponent<Renderer>().sharedMaterial ||

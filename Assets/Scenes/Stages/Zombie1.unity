@@ -17994,6 +17994,19 @@ Prefab:
       propertyPath: m_RootOrder
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 114000012410028976, guid: 5f5bce5e743e7e04d9a6463dc816748d,
+        type: 2}
+      propertyPath: reflectLayers.m_Bits
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000011538559848, guid: 5f5bce5e743e7e04d9a6463dc816748d, type: 2}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000011538559848, guid: 5f5bce5e743e7e04d9a6463dc816748d, type: 2}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5f5bce5e743e7e04d9a6463dc816748d, type: 2}
   m_IsPrefabParent: 0
@@ -54739,6 +54752,10 @@ Prefab:
     - target: {fileID: 4000014066759156, guid: db18f6d68bd1a9d4c84e201739dacee5, type: 2}
       propertyPath: m_RootOrder
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000010929644434, guid: db18f6d68bd1a9d4c84e201739dacee5, type: 2}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: db18f6d68bd1a9d4c84e201739dacee5, type: 2}
