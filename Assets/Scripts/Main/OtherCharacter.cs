@@ -26,6 +26,8 @@ public class OtherCharacter : MonoBehaviour {
 
     [SerializeField] GameObject FlashObj;
 
+    [SerializeField] TextMesh txtName;
+
     Vector3 oldPos;
     float oldVelX, oldVelZ;
 
@@ -36,6 +38,8 @@ public class OtherCharacter : MonoBehaviour {
         m_animator = zombie.GetComponent<Animator>();
         clientInfo = client.clients.Find(cc => cc.name.Equals(playerName) && cc.identification.Equals(playerIdentification));
 
+        //Player name
+        txtName.text = playerName;
     }
 
     // Update is called once per frame
@@ -92,7 +96,11 @@ public class OtherCharacter : MonoBehaviour {
                 clientInfo.userIsAttack = false;
             }
 
+            //Flash on/off
             FlashObj.SetActive(clientInfo.userIsFlashOn);
+
+            //Player name rotation
+            txtName.gameObject.transform.LookAt(Camera.main.transform);
         } catch (System.Exception e)
         {
             print(e.Message);
