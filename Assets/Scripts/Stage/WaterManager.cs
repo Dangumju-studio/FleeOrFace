@@ -6,19 +6,18 @@ public class WaterManager : MonoBehaviour {
     public GameObject wind;
     public GameObject[] wateroutsound;
     public GameObject waterUp;
-    public GameObject waterDown;
+    public GameObject diving;
     
 
     // Use this for initialization
     public bool playerwaterin = false;
 	void Start () {
-        waterDown.SetActive(false);
-        waterUp.SetActive(true);
+    
     }
 	
 	// Update is called once per frame
 	void Update () {
-        print(waterUp.GetComponent<UnityStandardAssets.Water.Water>().reflectLayers.value);
+       
 	}
 
     public void OnTriggerEnter(Collider col)
@@ -28,6 +27,7 @@ public class WaterManager : MonoBehaviour {
             waterUp.transform.rotation = Quaternion.Euler(180f, 0f, 0f);
             waterUp.GetComponent<UnityStandardAssets.Water.Water>().reflectLayers.value = -257;
             water.GetComponent<AudioSource>().Play();
+            diving.GetComponent<AudioSource>().PlayOneShot(diving.GetComponent<AudioSource>().clip);         
             wind.GetComponent<AudioSource>().Stop();                
             GameObject.FindWithTag("Player").GetComponent<AudioSource>().volume = 0;
             for(int i = 0;  i < wateroutsound.Length; i++)
