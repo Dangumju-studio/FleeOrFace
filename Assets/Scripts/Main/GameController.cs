@@ -69,6 +69,13 @@ public class GameController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        //Hide all menu ui
+        m_pnESCMenu.SetActive(false);
+        m_pnVRESCMenu.SetActive(false);
+        m_pnGameOver.SetActive(false);
+        m_pnVRGameOver.SetActive(false);
+        m_pnBackToMain.SetActive(false);
+        m_pnExitToDesktop.SetActive(false);
 
         //Get client
         if (!DEBUGGING_MODE)
@@ -120,14 +127,6 @@ public class GameController : MonoBehaviour {
                 oc.playerName = ci.name;
                 oc.playerIdentification = ci.identification;
             }
-
-        //Hide all menu
-        m_pnESCMenu.SetActive(false);
-        m_pnVRESCMenu.SetActive(false);
-        m_pnGameOver.SetActive(false);
-        m_pnVRGameOver.SetActive(false);
-        m_pnBackToMain.SetActive(false);
-        m_pnExitToDesktop.SetActive(false);
 
     }
     /// <summary>
