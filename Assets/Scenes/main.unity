@@ -4081,7 +4081,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8370cc0c68730634fa79a47f2842ebf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DEBUGGING_MODE: 0
+  DEBUGGING_MODE: 1
   isThirdPersonCamera: 0
   m_PlayerCamera: {fileID: 1081847222}
   m_fpsCtrl: {fileID: 1868779870}
@@ -7220,8 +7220,8 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1808484749}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 10}
-  m_LocalScale: {x: 0.05, y: 0.05, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.2}
+  m_LocalScale: {x: 0.0007, y: 0.0007, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 392917168}
