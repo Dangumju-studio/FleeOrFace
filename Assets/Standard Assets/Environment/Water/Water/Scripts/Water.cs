@@ -23,6 +23,8 @@ namespace UnityStandardAssets.Water
         public LayerMask refractLayers = -1;
 
 
+
+
         private Dictionary<Camera, Camera> m_ReflectionCameras = new Dictionary<Camera, Camera>(); // Camera -> Camera table
         private Dictionary<Camera, Camera> m_RefractionCameras = new Dictionary<Camera, Camera>(); // Camera -> Camera table
         private RenderTexture m_ReflectionTexture;
@@ -35,8 +37,14 @@ namespace UnityStandardAssets.Water
 
         // This is called when it's known that the object will be rendered by some
         // camera. We render reflections / refractions and do other updates here.
-        // Because the script executes in edit mode, reflections for the scene view
-        // camera will just work!
+        // Because the script e
+        
+            
+            
+            
+            
+            
+            // camera will just work!
         public void OnWillRenderObject()
         {
             if (!enabled || !GetComponent<Renderer>() || !GetComponent<Renderer>().sharedMaterial ||
@@ -167,29 +175,29 @@ namespace UnityStandardAssets.Water
 
 
         // Cleanup all the objects we possibly have created
-        void OnDisable()
-        {
-            if (m_ReflectionTexture)
-            {
-                DestroyImmediate(m_ReflectionTexture);
-                m_ReflectionTexture = null;
-            }
-            if (m_RefractionTexture)
-            {
-                DestroyImmediate(m_RefractionTexture);
-                m_RefractionTexture = null;
-            }
-            foreach (var kvp in m_ReflectionCameras)
-            {
-                DestroyImmediate((kvp.Value).gameObject);
-            }
-            m_ReflectionCameras.Clear();
-            foreach (var kvp in m_RefractionCameras)
-            {
-                DestroyImmediate((kvp.Value).gameObject);
-            }
-            m_RefractionCameras.Clear();
-        }
+        //void OnDisable()
+        //{
+        //    if (m_ReflectionTexture)
+        //    {
+        //        DestroyImmediate(m_ReflectionTexture);
+        //        m_ReflectionTexture = null;
+        //    }
+        //    if (m_RefractionTexture)
+        //    {
+        //        DestroyImmediate(m_RefractionTexture);
+        //        m_RefractionTexture = null;
+        //    }
+        //    foreach (var kvp in m_ReflectionCameras)
+        //    {
+        //        DestroyImmediate((kvp.Value).gameObject);
+        //    }
+        //    m_ReflectionCameras.Clear();
+        //    foreach (var kvp in m_RefractionCameras)
+        //    {
+        //        DestroyImmediate((kvp.Value).gameObject);
+        //    }
+        //    m_RefractionCameras.Clear();
+        //}
 
 
         // This just sets up some matrices in the material; for really
