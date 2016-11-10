@@ -45,7 +45,9 @@ public class GameController : MonoBehaviour {
 
     Client client;
     IngameManager gameManager;
-    PlayerState playerState;
+    public PlayerState playerState;
+
+    [SerializeField] AudioClip audioThunder;
     
     /// <summary>
     /// Other player's object prefab
@@ -128,6 +130,7 @@ public class GameController : MonoBehaviour {
                 oc.playerIdentification = ci.identification;
             }
 
+        SwitchPlayerCharacter();
     }
     /// <summary>
     /// Game scene(map) load method (Coroutine)
@@ -194,34 +197,7 @@ public class GameController : MonoBehaviour {
             if (client.userState != playerState)
             {
                 playerState = client.userState;
-                switch (playerState)
-                {
-                    case PlayerState.Human:
-                        humanObj.SetActive(true);
-                        humanFPSObj.SetActive(true);
-                        zombieObj.SetActive(false);
-                        zombieFPSObj.SetActive(false);
-                        m_fpsCtrl.m_Animator = humanObj.GetComponent<Animator>();
-                        m_fpsCtrl.m_Animator_fps = humanFPSObj.GetComponent<Animator>();
-                        txtPlayerStatus.text = "You are the human..";
-                        txtVRPlayerStatus.text = "You are the human..";
-                        break;
-                    case PlayerState.Zombie:
-                        zombieObj.SetActive(true);
-                        zombieFPSObj.SetActive(true);
-                        humanObj.SetActive(false);
-                        humanFPSObj.SetActive(false);
-                        m_fpsCtrl.m_Animator = zombieObj.GetComponent<Animator>();
-                        m_fpsCtrl.m_Animator_fps = zombieFPSObj.GetComponent<Animator>();
-                        txtPlayerStatus.text = "You are the zombie..";
-                        txtVRPlayerStatus.text = "You are the zombie..";
-                        break;
-                    case PlayerState.Dead:
-                        //DEATH EFFECT
-
-                        //FREE CAM MODE
-                        break;
-                }
+                SwitchPlayerCharacter();
             }
         }
 
@@ -345,5 +321,53 @@ public class GameController : MonoBehaviour {
                 Cursor.visible = true;
             }
         }
+    }
+
+    /// <summary>
+    /// Switch player character refer userstate
+    /// </summary>
+    void SwitchPlayerCharacter()
+    {
+        m_fpsCtrl.GetComponent<AudioSource>().PlayOneShot(audioThunder);
+        StartCoroutine(SwitchPlayerThunder());
+        switch (playerState)
+        {
+            case PlayerState.Human:
+                humanObj.SetActive(true);
+                humanFPSObj.SetActive(true);
+                zombieObj.SetActive(false);
+                zombieFPSObj.SetActive(false);
+                m_fpsCtrl.m_Animator = humanObj.GetComponent<Animator>();
+                m_fpsCtrl.m_Animator_fps = humanFPSObj.GetComponent<Animator>();
+                txtPlayerStatus.text = "You are the human..";
+                txtVRPlayerStatus.text = "You are the human..";
+                break;
+            case PlayerState.Zombie:
+                zombieObj.SetActive(true);
+                zombieFPSObj.SetActive(true);
+                humanObj.SetActive(false);
+                humanFPSObj.SetActive(false);
+                m_fpsCtrl.m_Animator = zombieObj.GetComponent<Animator>();
+                m_fpsCtrl.m_Animator_fps = zombieFPSObj.GetComponent<Animator>();
+                txtPlayerStatus.text = "You are the zombie..";
+                txtVRPlayerStatus.text = "You are the zombie..";
+                break;
+        }
+    }
+    IEnumerator SwitchPlayerThunder()
+    {
+        Light light = GameObject.FindGameObjectWithTag("Sunlight").GetComponent<Light>();
+        light.intensity = 6f;
+        yield return new WaitForSeconds(0.1f);
+        light.intensity = 0.5f;
+        yield return new WaitForSeconds(0.1f);
+        light.intensity = 5f;
+
+        while (light.intensity > 0.8f)
+        {
+            light.intensity -= 0.2f;
+            yield return new WaitForSeconds(0.05f);
+        }
+        light.intensity = 0.8f;
     }
 }

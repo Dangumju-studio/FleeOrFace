@@ -58,7 +58,7 @@ public class IngameManager : MonoBehaviour {
     public bool Initialize()
     {
         try
-        { 
+        {
             //Zombie or Human
             DistributeRole();
             //Set each player's position and rotation
@@ -90,7 +90,7 @@ public class IngameManager : MonoBehaviour {
         //mix(shuffle)
         System.Random rnd = new System.Random();
         int n = server.clients.Count;
-        while(n>1)
+        while (n > 1)
         {
             n--;
             int k = rnd.Next(n + 1);
@@ -106,7 +106,7 @@ public class IngameManager : MonoBehaviour {
         server.NoticeData(NetCommand.RoleRotate, sb.ToString());
 
         lastRotatedTime = System.DateTime.Now;
-        rotateTimeTerm = rnd.Next(10, 35);
+        rotateTimeTerm = rnd.Next(10, 12);
     }
 
     /// <summary>

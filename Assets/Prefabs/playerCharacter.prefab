@@ -1457,7 +1457,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1000012872110890
 GameObject:
   m_ObjectHideFlags: 1
@@ -1725,7 +1725,7 @@ GameObject:
   - 132: {fileID: 132000010163615998}
   m_Layer: 0
   m_Name: playerCharacter
-  m_TagString: Untagged
+  m_TagString: OtherPlayer
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
