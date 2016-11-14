@@ -18,7 +18,7 @@ public class WaterManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        print(waterUp.GetComponent<UnityStandardAssets.Water.Water>().reflectLayers.value);
+        //print(waterUp.GetComponent<UnityStandardAssets.Water.Water>().reflectLayers.value);
 	}
 
     public void OnTriggerEnter(Collider col)

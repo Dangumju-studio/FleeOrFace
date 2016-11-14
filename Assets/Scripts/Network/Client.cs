@@ -214,7 +214,7 @@ public class Client : MonoBehaviour {
                     break;
 
                 case NetCommand.RoleRotate:
-                    values = msgReceived.msg.Split(new char[] { ',' });
+                    values = msgReceived.msg.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     foreach(string s in values)
                     {
                         string cur_identification = s.Substring(0, s.IndexOf(':'));

@@ -15,7 +15,9 @@ public class GameController : MonoBehaviour {
 
     #region player modeling objects
     [SerializeField] GameObject zombieObj, zombieFPSObj;
+    [SerializeField] SkinnedMeshRenderer zombieObjRenderer, zombieFPSObjRenderer;
     [SerializeField] GameObject humanObj, humanFPSObj;
+    [SerializeField] SkinnedMeshRenderer humanObjRenderer, humanFPSObjRenderer;
     #endregion
 
     #region Canvas Gameobjects
@@ -48,6 +50,8 @@ public class GameController : MonoBehaviour {
     public PlayerState playerState;
 
     [SerializeField] AudioClip audioThunder;
+    [SerializeField] AudioClip audioFlash;
+    AudioSource sceneAudio;
     
     /// <summary>
     /// Other player's object prefab
@@ -79,6 +83,8 @@ public class GameController : MonoBehaviour {
         m_pnBackToMain.SetActive(false);
         m_pnExitToDesktop.SetActive(false);
 
+        sceneAudio = GetComponent<AudioSource>();
+
         //Get client
         if (!DEBUGGING_MODE)
         {
@@ -96,6 +102,11 @@ public class GameController : MonoBehaviour {
             OVRManager.instance.gameObject.GetComponent<OVRCameraRig>().enabled = false;
             OVRManager.instance.enabled = false;
             m_pnVRCanvas.SetActive(false);
+            //TPS modeling
+            zombieFPSObjRenderer.enabled = false;
+            humanFPSObjRenderer.enabled = false;
+            zombieObjRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            humanObjRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
         }
         else {
             //Not using HMD
@@ -216,6 +227,7 @@ public class GameController : MonoBehaviour {
         if(CrossPlatformInputManager.GetButtonDown("Flash"))
         {
             isFlashOn = !isFlashOn;
+            sceneAudio.PlayOneShot(audioFlash);
             FlashObj.SetActive(isFlashOn);
         }
 
@@ -292,6 +304,10 @@ public class GameController : MonoBehaviour {
     public void btnBackToMainYes_Clicked()
     {
         client.SendData(NetCommand.Disconnect, "");
+        isGameStart = false;
+        client.isConnected = false;
+        client.isGamePlaying = false;
+        client.isLoadingStarting = false;
         UnityEngine.SceneManagement.SceneManager.LoadScene("menu");
     }
     public void btnExitToDesktopYes_Clicked()
@@ -328,7 +344,7 @@ public class GameController : MonoBehaviour {
     /// </summary>
     void SwitchPlayerCharacter()
     {
-        m_fpsCtrl.GetComponent<AudioSource>().PlayOneShot(audioThunder);
+        sceneAudio.PlayOneShot(audioThunder);
         StartCoroutine(SwitchPlayerThunder());
         switch (playerState)
         {
