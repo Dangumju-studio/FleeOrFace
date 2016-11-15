@@ -7,7 +7,8 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Text;
 
-public class Client : MonoBehaviour {
+public class Client : MonoBehaviour
+{
     private Socket client;
     public EndPoint epServer;
     public string playerName = "Player";
@@ -130,7 +131,9 @@ public class Client : MonoBehaviour {
                     {
                         isConnected = true;
                         SendData(NetCommand.Check, "");
-                    } else {
+                    }
+                    else
+                    {
                         cInfo = new ClientInfo();
                         cInfo.name = msgReceived.name;
                         cInfo.identification = msgReceived.identify;
@@ -161,7 +164,7 @@ public class Client : MonoBehaviour {
                     foreach (string s in players)
                     {
                         string[] pStr = s.Split(new char[] { ':' });
-                        ClientInfo ci = ClientInfo.findClientInfo(ref clientLists,pStr[1]);
+                        ClientInfo ci = ClientInfo.findClientInfo(ref clientLists, pStr[1]);
                         if (ci != null)
                         {
                             //modify
@@ -232,7 +235,7 @@ public class Client : MonoBehaviour {
                             cInfo.userIsAttack = true;
 
                     //Set victim's userstate
-                    if(msgReceived.msg.Length > 0)
+                    if (msgReceived.msg.Length > 0)
                         if (identification == msgReceived.msg)
                             userState = PlayerState.Dead;
                         else
@@ -251,7 +254,7 @@ public class Client : MonoBehaviour {
                     foreach (string s in values)
                     {
                         string cur_identification = s.Substring(0, s.IndexOf(':'));
-                        int role = int.Parse(s.Substring(s.IndexOf(':') + 1, s.Length - s.IndexOf(':')-1));
+                        int role = int.Parse(s.Substring(s.IndexOf(':') + 1, s.Length - s.IndexOf(':') - 1));
                         cInfo = ClientInfo.findClientInfo(ref clientLists, cur_identification);
                         if (cInfo != null)
                             cInfo.userState = (PlayerState)role;
@@ -273,7 +276,8 @@ public class Client : MonoBehaviour {
         {
             print(ex.Message);
         }
-        finally {
+        finally
+        {
             //Continue receiving
             bData = new byte[1024];
             client.BeginReceiveFrom(bData, 0, bData.Length, SocketFlags.None, ref epServer, new AsyncCallback(OnReceive), null);
@@ -328,9 +332,9 @@ public class Client : MonoBehaviour {
     /// <returns></returns>
     public IEnumerator SendCheck()
     {
-        while(isConnected)
+        while (isConnected)
         {
-            print("SendCheck:" + playerName);
+            //print("SendCheck:" + playerName);
             yield return new WaitForSeconds(5f);
             SendData(NetCommand.Check, "");
         }
@@ -346,9 +350,15 @@ public class Client : MonoBehaviour {
     public void SendPlayerControl()
     {
         SendData(NetCommand.PositionRotation, positionRotation);
-        if (attack) {
+        if (attack)
+        {
             if (userState == PlayerState.Zombie) SendData(NetCommand.Attack, "True");
             attack = false;
         }
+    }
+
+    void OnApplicationQuit()
+    {
+        Disconnect();
     }
 }
