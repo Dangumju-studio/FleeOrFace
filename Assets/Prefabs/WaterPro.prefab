@@ -23,7 +23,7 @@ GameObject:
   - 23: {fileID: 23000012281853366}
   - 114: {fileID: 114000012410028976}
   m_Layer: 4
-  m_Name: WaterProUp
+  m_Name: WaterPro
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
