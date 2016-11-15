@@ -4487,7 +4487,7 @@ Light:
     m_NormalBias: 0.4
     m_NearPlane: 0.2
   m_Cookie: {fileID: 0}
-  m_DrawHalo: 1
+  m_DrawHalo: 0
   m_Flare: {fileID: 0}
   m_RenderMode: 0
   m_CullingMask:
@@ -4523,10 +4523,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e9714160ce34f2b4ab63ff8c27bd68e1, type: 3}
   audioJump: {fileID: 8300000, guid: 5897aeed9b676024fbb8c694b421a861, type: 3}
   audioLand: {fileID: 8300000, guid: 3b09d59f4499d45428baa7a21e954296, type: 3}
-  audioFlash: {fileID: 8300000, guid: 7694d9fb8e53093499cc0b5f7997cad6, type: 3}
-  audioWaterIn: {fileID: 8300000, guid: 9a139b33c3be1fc40bd8118cdd3c980e, type: 3}
-  audioWaterOut: {fileID: 8300000, guid: ea53e81e411ec924cbcee6ae5491e703, type: 3}
-  audioAttack: {fileID: 8300000, guid: a687e42c92d88544787de9aec813b7bd, type: 3}
+  audioFlash: {fileID: 8300000, guid: 9b9fd52f3ddb8e248a772c46bbb88bd3, type: 3}
+  audioWaterIn: {fileID: 8300000, guid: 6b5391503f9d33547940a6f328996acd, type: 3}
+  audioWaterOut: {fileID: 8300000, guid: 1f0cd5ecd5ed2bc4c9b0d486920b8695, type: 3}
+  audioAttack: {fileID: 8300000, guid: 7cd58ce142bc56540b673c448141dc3a, type: 3}
 --- !u!135 &135000010493160902
 SphereCollider:
   m_ObjectHideFlags: 1

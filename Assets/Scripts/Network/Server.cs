@@ -241,6 +241,7 @@ public class Server : MonoBehaviour {
                                             //Reset every clientinfo
                                             c.isReady = false;
                                             c.isLoadingDone = false;
+                                            c.userState = PlayerState.None;
                                             udpServer.BeginSendTo(endmsg, 0, endmsg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                                         }
                                     }
