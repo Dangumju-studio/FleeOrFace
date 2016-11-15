@@ -20219,7 +20219,7 @@ Prefab:
     - target: {fileID: 114000012410028976, guid: 5f5bce5e743e7e04d9a6463dc816748d,
         type: 2}
       propertyPath: textureSize
-      value: 128
+      value: 512
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5f5bce5e743e7e04d9a6463dc816748d, type: 2}

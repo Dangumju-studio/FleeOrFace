@@ -24,7 +24,8 @@ public class WaterManager : MonoBehaviour {
     public void OnTriggerEnter(Collider col)
     {
         if (col.tag == "Player")
-        {      
+        {
+            col.gameObject.GetComponent<UnityStandardAssets.Characters.FirstPerson.FirstPersonController>().m_isInWater = true;
             waterUp.transform.rotation = Quaternion.Euler(180f, 0f, 0f);
             waterUp.GetComponent<UnityStandardAssets.Water.Water>().reflectLayers.value = -257;
             water.GetComponent<AudioSource>().Play();
@@ -36,7 +37,9 @@ public class WaterManager : MonoBehaviour {
                 wateroutsound[i].GetComponent<AudioSource>().Stop();
             }
         }
-        else if (col.tag == "OtherPlayer") { GetComponent<OtherCharacter>().OnWaterEnter(); }
+        else if (col.tag == "OtherPlayer") {
+            GetComponent<OtherCharacter>().OnWaterEnter();
+        }
 
         
     }
@@ -44,6 +47,7 @@ public class WaterManager : MonoBehaviour {
     {
         if (col.tag == "Player")
         {
+            col.gameObject.GetComponent<UnityStandardAssets.Characters.FirstPerson.FirstPersonController>().m_isInWater = false;
             waterout.GetComponent<AudioSource>().PlayOneShot(waterout.GetComponent<AudioSource>().clip);
             waterUp.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             waterUp.GetComponent<UnityStandardAssets.Water.Water>().reflectLayers.value = -1;
