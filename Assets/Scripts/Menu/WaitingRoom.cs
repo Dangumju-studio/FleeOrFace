@@ -81,7 +81,7 @@ public class WaitingRoom : MonoBehaviour {
         //Add player into playerlist
         foreach(ClientInfo ci in client.clientLists)
         {
-            if (ci.name == client.playerName && ci.identification == client.identification) continue;
+            if (ci.identification == client.identification) continue;
             PlayerInfo pi = playerInfoList.Find(p => p.identification.Equals(ci.identification));
             if(pi == null)
             {

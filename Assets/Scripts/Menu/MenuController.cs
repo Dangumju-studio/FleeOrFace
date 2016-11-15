@@ -33,6 +33,9 @@ public class MenuController : MonoBehaviour {
         if (txtName.text.Length > 0)
         {
             client.playerName = txtName.text;
+            //remove non-alphanumeric characters
+            System.Text.RegularExpressions.Regex rgx = new System.Text.RegularExpressions.Regex("[,:\"'/\\()]");
+            client.playerName = rgx.Replace(client.playerName, "");
             //Generate identification string
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             for(int i=0; i<8; i++)

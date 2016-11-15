@@ -470,7 +470,7 @@ public class GameController : MonoBehaviour {
         }
         m_pnGameOver.SetActive(true);
         m_pnVRGameOver.SetActive(true);
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(5f);
         isGameStart = false;
         isGameOver = false;
         client.isGameOver = false;
@@ -478,6 +478,14 @@ public class GameController : MonoBehaviour {
         client.isLoadingStarting = false;
         client.strWinner = "";
         StopCoroutine(client.SendCheck());
+
+        foreach (ClientInfo ci in client.clientLists)
+        {
+            ci.isReady = false;
+            ci.isLoadingDone = false;
+            ci.userState = PlayerState.None;
+        }
+
         UnityEngine.SceneManagement.SceneManager.LoadScene("room");
     }
 }
