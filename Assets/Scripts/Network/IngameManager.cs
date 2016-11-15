@@ -49,11 +49,11 @@ public class IngameManager : MonoBehaviour {
     /// <summary>
     /// Attack range.
     /// </summary>
-    private readonly float ATTACK_RANGE = 1.5f;
+    private readonly float ATTACK_RANGE = 3f;
     /// <summary>
     /// Attack angle range
     /// </summary>
-    private readonly float ATTACK_ANGLE_RANGE = 20;
+    private readonly float ATTACK_ANGLE_RANGE = 35;
 
     void Start()
     {

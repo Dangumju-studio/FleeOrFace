@@ -220,6 +220,10 @@ public class GameController : MonoBehaviour {
             int rotateTime = client.rotateTimeLeft;
             txtRotateLeftTime.text = Mathf.Clamp(client.rotateTimeLeft, 0, 100).ToString();
             txtVRRotateLeftTime.text = Mathf.Clamp(client.rotateTimeLeft, 0, 100).ToString();
+            if(playerState == PlayerState.Human)
+                m_fpsCtrl.isHuman = true;
+            else
+                m_fpsCtrl.isHuman = false;
 
             SwitchPlayerCharacter();
             if (isGameStart && client.isRoleRotated)
@@ -289,7 +293,7 @@ public class GameController : MonoBehaviour {
     /// </summary>
     IEnumerator AttackEnd()
     {
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.1f);
         attackAvailable = true;
     }
 

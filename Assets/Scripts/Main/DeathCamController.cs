@@ -4,7 +4,7 @@ using UnityStandardAssets.CrossPlatformInput;
 public class DeathCamController : MonoBehaviour {
 
     public float moveSpeed = 10;
-    public float rotSpeed = 60;
+    public float rotSpeed = 80;
 
 	// Use this for initialization
 	void Start () {

@@ -13,6 +13,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private bool m_IsWalking;
         [SerializeField] private float m_WalkSpeed;
         [SerializeField] private float m_RunSpeed;
+        [SerializeField] private float m_WaterReduce;
         [SerializeField] private bool m_AllowAirMove;
         [SerializeField] [Range(0f, 1f)] private float m_RunstepLenghten;
         [SerializeField] private float m_JumpSpeed;
@@ -48,6 +49,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public Animator m_Animator_fps;
 
         public bool m_isPause;
+        public bool m_isInWater;
+        public bool isHuman;
 
         // Use this for initialization
         private void Start()
@@ -63,7 +66,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera_wrapper.transform);
             m_isPause = false;
-           
         }
 
 
@@ -116,6 +118,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_MoveDir.x = desiredMove.x*speed;
             m_MoveDir.z = desiredMove.z*speed;
 
+            if(m_isInWater && isHuman)
+            {
+                m_MoveDir.x *= m_WaterReduce;
+                m_MoveDir.z *= m_WaterReduce;
+            }
 
             if (m_CharacterController.isGrounded)
             {
@@ -303,7 +310,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         /// </summary>
         System.Collections.IEnumerator AttackEnd()
         {
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.1f);
             Attacked = false;
         }
     }
