@@ -155,8 +155,12 @@ public class WaitingRoom : MonoBehaviour {
 
     public void btnBack_Clicked()
     {
-        client.Disconnect();
-        if (server.isServerOpened) server.CloseServer();
+        try
+        {
+            client.Disconnect();
+            if (server.isServerOpened) server.CloseServer();
+        }
+        catch { }
         UnityEngine.SceneManagement.SceneManager.LoadScene("menu");
     }
 

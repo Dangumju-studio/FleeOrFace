@@ -310,6 +310,8 @@ public class GameController : MonoBehaviour {
                     isGameStart = true;
                     m_pnLoadingBG.SetActive(false);
                     m_pnIngameUI.SetActive(true);
+                    m_pnVRLoadingBG.SetActive(false);
+                    m_pnVRIngameUI.SetActive(true);
                     m_fpsCtrl.enabled = true;
                     m_fpsCtrl.gameObject.GetComponent<Rigidbody>().useGravity = true;
                     m_fpsCtrl.transform.position = new Vector3(m_fpsCtrl.transform.position.x, 10, m_fpsCtrl.transform.position.z);
