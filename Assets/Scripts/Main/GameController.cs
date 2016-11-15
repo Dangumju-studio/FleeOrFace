@@ -15,7 +15,10 @@ public class GameController : MonoBehaviour {
 
     #region player modeling objects
     [SerializeField] GameObject zombieObj, zombieFPSObj;
+    [SerializeField] SkinnedMeshRenderer zombieObjRenderer, zombieFPSObjRenderer;
     [SerializeField] GameObject humanObj, humanFPSObj;
+    [SerializeField] SkinnedMeshRenderer humanObjRenderer, humanFPSObjRenderer;
+    [SerializeField] GameObject playerRagdollObj;
     #endregion
 
     #region Canvas Gameobjects
@@ -45,8 +48,15 @@ public class GameController : MonoBehaviour {
 
     Client client;
     IngameManager gameManager;
-    PlayerState playerState;
-    
+    public PlayerState playerState;
+
+    #region audio clip/sources
+    [SerializeField] AudioClip audioThunder;
+    [SerializeField] AudioClip audioFlash;
+    [SerializeField] AudioClip audioAttack;
+    AudioSource sceneAudio;
+    #endregion
+
     /// <summary>
     /// Other player's object prefab
     /// </summary>
@@ -77,6 +87,8 @@ public class GameController : MonoBehaviour {
         m_pnBackToMain.SetActive(false);
         m_pnExitToDesktop.SetActive(false);
 
+        sceneAudio = GetComponent<AudioSource>();
+
         //Get client
         if (!DEBUGGING_MODE)
         {
@@ -94,6 +106,11 @@ public class GameController : MonoBehaviour {
             OVRManager.instance.gameObject.GetComponent<OVRCameraRig>().enabled = false;
             OVRManager.instance.enabled = false;
             m_pnVRCanvas.SetActive(false);
+            //TPS modeling
+            zombieFPSObjRenderer.enabled = false;
+            humanFPSObjRenderer.enabled = false;
+            zombieObjRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            humanObjRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
         }
         else {
             //Not using HMD
@@ -128,6 +145,7 @@ public class GameController : MonoBehaviour {
                 oc.playerIdentification = ci.identification;
             }
 
+        SwitchPlayerCharacter();
     }
     /// <summary>
     /// Game scene(map) load method (Coroutine)
@@ -194,34 +212,13 @@ public class GameController : MonoBehaviour {
             if (client.userState != playerState)
             {
                 playerState = client.userState;
-                switch (playerState)
+                if(playerState == PlayerState.Dead)
                 {
-                    case PlayerState.Human:
-                        humanObj.SetActive(true);
-                        humanFPSObj.SetActive(true);
-                        zombieObj.SetActive(false);
-                        zombieFPSObj.SetActive(false);
-                        m_fpsCtrl.m_Animator = humanObj.GetComponent<Animator>();
-                        m_fpsCtrl.m_Animator_fps = humanFPSObj.GetComponent<Animator>();
-                        txtPlayerStatus.text = "You are the human..";
-                        txtVRPlayerStatus.text = "You are the human..";
-                        break;
-                    case PlayerState.Zombie:
-                        zombieObj.SetActive(true);
-                        zombieFPSObj.SetActive(true);
-                        humanObj.SetActive(false);
-                        humanFPSObj.SetActive(false);
-                        m_fpsCtrl.m_Animator = zombieObj.GetComponent<Animator>();
-                        m_fpsCtrl.m_Animator_fps = zombieFPSObj.GetComponent<Animator>();
-                        txtPlayerStatus.text = "You are the zombie..";
-                        txtVRPlayerStatus.text = "You are the zombie..";
-                        break;
-                    case PlayerState.Dead:
-                        //DEATH EFFECT
-
-                        //FREE CAM MODE
-                        break;
+                    //put ragdoll.
+                    GameObject ragdoll = Instantiate(playerRagdollObj, m_fpsCtrl.gameObject.transform.position, m_fpsCtrl.gameObject.transform.rotation) as GameObject;
                 }
+                else 
+                    SwitchPlayerCharacter();
             }
         }
 
@@ -240,6 +237,7 @@ public class GameController : MonoBehaviour {
         if(CrossPlatformInputManager.GetButtonDown("Flash"))
         {
             isFlashOn = !isFlashOn;
+            sceneAudio.PlayOneShot(audioFlash);
             FlashObj.SetActive(isFlashOn);
         }
 
@@ -316,6 +314,10 @@ public class GameController : MonoBehaviour {
     public void btnBackToMainYes_Clicked()
     {
         client.SendData(NetCommand.Disconnect, "");
+        isGameStart = false;
+        client.isConnected = false;
+        client.isGamePlaying = false;
+        client.isLoadingStarting = false;
         UnityEngine.SceneManagement.SceneManager.LoadScene("menu");
     }
     public void btnExitToDesktopYes_Clicked()
@@ -344,6 +346,57 @@ public class GameController : MonoBehaviour {
                 m_pnExitToDesktop.SetActive(false);
                 Cursor.visible = true;
             }
+        }
+    }
+
+    /// <summary>
+    /// Switch player character refer userstate
+    /// </summary>
+    void SwitchPlayerCharacter()
+    {
+        sceneAudio.PlayOneShot(audioThunder);
+        StartCoroutine(SwitchPlayerThunder());
+        switch (playerState)
+        {
+            case PlayerState.Human:
+                humanObj.SetActive(true);
+                humanFPSObj.SetActive(true);
+                zombieObj.SetActive(false);
+                zombieFPSObj.SetActive(false);
+                m_fpsCtrl.m_Animator = humanObj.GetComponent<Animator>();
+                m_fpsCtrl.m_Animator_fps = humanFPSObj.GetComponent<Animator>();
+                txtPlayerStatus.text = "You are the human..";
+                txtVRPlayerStatus.text = "You are the human..";
+                break;
+            case PlayerState.Zombie:
+                zombieObj.SetActive(true);
+                zombieFPSObj.SetActive(true);
+                humanObj.SetActive(false);
+                humanFPSObj.SetActive(false);
+                m_fpsCtrl.m_Animator = zombieObj.GetComponent<Animator>();
+                m_fpsCtrl.m_Animator_fps = zombieFPSObj.GetComponent<Animator>();
+                txtPlayerStatus.text = "You are the zombie..";
+                txtVRPlayerStatus.text = "You are the zombie..";
+                break;
+        }
+    }
+    IEnumerator SwitchPlayerThunder()
+    {
+        if (isGameStart)
+        {
+            Light light = GameObject.FindGameObjectWithTag("Sunlight").GetComponent<Light>();
+            light.intensity = 6f;
+            yield return new WaitForSeconds(0.1f);
+            light.intensity = 0.5f;
+            yield return new WaitForSeconds(0.1f);
+            light.intensity = 5f;
+
+            while (light.intensity > 0.8f)
+            {
+                light.intensity -= 0.2f;
+                yield return new WaitForSeconds(0.05f);
+            }
+            light.intensity = 0.8f;
         }
     }
 }

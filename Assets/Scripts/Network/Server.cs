@@ -84,7 +84,7 @@ public class Server : MonoBehaviour {
             dataToSend.msg = dataReceived.msg;
             byte[] msg = dataToSend.ConvertToByte();
             ClientInfo cInfo;
-
+            string[] values;
             switch (dataReceived.cmd)
             {
                 // When player connected
@@ -123,7 +123,7 @@ public class Server : MonoBehaviour {
                 case NetCommand.Check:
                     //update lastcheck time
                     cInfo = clients.Find(c => c.ep.Equals(epSender));
-                    print("Checked: " + cInfo.name);
+                    //print("Checked: " + cInfo.name);
                     cInfo.lastCheck = DateTime.Now;
                     dataToSend.msg = "";
                     //Ready to send clients list.
@@ -148,9 +148,9 @@ public class Server : MonoBehaviour {
 
                 //Map setting changed
                 case NetCommand.MapSetting:
-                    string[] settingvalues = dataReceived.msg.Split(new char[] { ',' });
-                    gameManager.mapNumber = int.Parse(settingvalues[0]);
-                    gameManager.is3rdCam = bool.Parse(settingvalues[1]);
+                    values = dataReceived.msg.Split(new char[] { ',' });
+                    gameManager.mapNumber = int.Parse(values[0]);
+                    gameManager.is3rdCam = bool.Parse(values[1]);
                     foreach (ClientInfo c in clients)
                     {
                         if (c.ep.Equals(epSender)) continue;
@@ -169,7 +169,7 @@ public class Server : MonoBehaviour {
 
                     //if all players are ready, Start LOADING GAME SCENE
                     cInfo = null;
-                    if (clients.Count >= 1)//2)
+                    if (clients.Count >= 2)
                     {
                         cInfo = clients.Find(c => c.isReady == false);
                         if (cInfo == null)
@@ -203,22 +203,56 @@ public class Server : MonoBehaviour {
                 
                 //Attack
                 case NetCommand.Attack:
+                    //Attack - Kill check
+                    cInfo = clients.Find(c => c.ep.Equals(epSender));
+                    string attacked = "";
+                    if (cInfo.userState == PlayerState.Zombie)
+                    {
+                        //Get attacked player's identification string.
+                        if (cInfo != null) attacked = gameManager.AttackCheck(ref cInfo);
+                        if (attacked.Length > 0)
+                        {
+                            //Get attacked player via attacked identification string.
+                            ClientInfo cInfo2 = clients.Find(c => c.identification == attacked);
+                            if (cInfo2 != null)
+                            {
+                                if (cInfo2.userState == PlayerState.Human)
+                                {
+                                    print(cInfo2.name + " has attacked by " + cInfo.name);
+                                    cInfo2.userState = PlayerState.Dead;
+                                }
+                            }
+                        }
+                    }
+                    dataToSend = new NetworkData(msg);
+                    dataToSend.msg = attacked;
+                    msg = dataToSend.ConvertToByte();
                     foreach (ClientInfo c in clients)
                     {
-                        if (c.ep.Equals(epSender)) continue;
+                        //if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
-
-                        //Attack - Kill check
-                        ////////////
                     }
                     break;
                 //Moving/Turning
                 case NetCommand.PositionRotation:
+                    cInfo = clients.Find(c => c.ep.Equals(epSender));
+                    values = dataReceived.msg.Split(new char[] { ',' });
+                    if (cInfo != null)
+                    {
+                        cInfo.userPosition = new Vector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
+                        cInfo.userRotation = new Quaternion(float.Parse(values[3]), float.Parse(values[4]), float.Parse(values[5]), float.Parse(values[6]));
+                        cInfo.userIsOnGround = bool.Parse(values[7]);
+                        cInfo.userIsFlashOn = bool.Parse(values[8]);
+                    }
                     foreach (ClientInfo c in clients)
                     {
                         if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
+                    break;
+                //GAME OVER
+                case NetCommand.Gameover:
+
                     break;
             }
         }

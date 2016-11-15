@@ -37,7 +37,6 @@ public class ClientInfo
     /// Game scene loading state
     /// </summary>
     public bool isLoadingDone;
-
     /// <summary>
     /// User character position
     /// </summary>
@@ -56,8 +55,13 @@ public class ClientInfo
     public bool userIsFlashOn;
     /// <summary>
     /// User Attack. (When this true, this will change to false immediately and Character will attack.)
+    /// Command message is a player's identification string which is attacked.
     /// </summary>
     public bool userIsAttack;
+    /// <summary>
+    /// Is this player in water?
+    /// </summary>
+    public bool isUnderWater;
     /// <summary>
     /// Player state (dead, zombie, human, none)
     /// </summary>
