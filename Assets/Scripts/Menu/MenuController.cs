@@ -80,5 +80,10 @@ public class MenuController : MonoBehaviour {
             }
         }
     }
+
+    public void btnExit()
+    {
+        Application.Quit();
+    }
     
 }

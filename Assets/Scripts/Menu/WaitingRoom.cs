@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public class WaitingRoom : MonoBehaviour {
     Client client;
-    //Server server;
+    Server server;
     IngameManager gameManager;
     [SerializeField] Text myPlayerName;
     [SerializeField] Text txtChatMessage;
@@ -28,6 +28,7 @@ public class WaitingRoom : MonoBehaviour {
     // Use this for initialization
     void Start () {
         client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
+        server = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Server>();
         gameManager = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<IngameManager>();
 
         //load maplist
@@ -150,6 +151,13 @@ public class WaitingRoom : MonoBehaviour {
         isReady = !isReady;
         client.SendData(NetCommand.Ready, isReady.ToString());
         btnReady.text = isReady ? "Cancel" : "Ready";
+    }
+
+    public void btnBack_Clicked()
+    {
+        client.Disconnect();
+        if (server.isServerOpened) server.CloseServer();
+        UnityEngine.SceneManagement.SceneManager.LoadScene("menu");
     }
 
     public void txtChat_Edited()

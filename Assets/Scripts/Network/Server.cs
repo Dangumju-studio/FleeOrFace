@@ -54,8 +54,11 @@ public class Server : MonoBehaviour {
     /// </summary>
     public void CloseServer()
     {
-        udpServer.Disconnect(false);
-        udpServer.Close();
+        if (isServerOpened)
+        {
+            udpServer.Disconnect(false);
+            udpServer.Close();
+        }
         udpServer.Dispose();
         udpServer = null;
         isServerOpened = false;
