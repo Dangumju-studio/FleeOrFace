@@ -6,14 +6,14 @@ public class WaterWalk : MonoBehaviour {
 
     void Start()
     {
-        player = GameObject.Find("FPScontroller");
+        player = GameObject.FindGameObjectWithTag("Player");
     }
 
     public void OnTriggerEnter(Collider col)
     {
         if (col.tag == "Player")
         {
-            //player.GetComponent<AudioSource>().clip = Resources.Load("Audio/waterwalk");
+            player.GetComponent<AudioSource>().clip = Resources.Load("waterwalk") as AudioClip;
         }
     }
 }
