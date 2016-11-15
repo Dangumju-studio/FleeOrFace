@@ -80,6 +80,9 @@ public class GameController : MonoBehaviour {
     //is Paused?
     public bool isPause = false;
 
+    //Prevent multiple character switching glitch
+    bool isCharacterSwitched = false;
+
     // Use this for initialization
     void Start () {
         //Hide all menu ui
@@ -138,12 +141,10 @@ public class GameController : MonoBehaviour {
             StartCoroutine(LoadGameScene(gameManager.mapList[gameManager.mapNumber]));
 
         //Randomly located
-        float x = Random.Range(5, 195);
+        float x = Random.Range(5, 95);
         float y = 20;
-        float z = Random.Range(5, 195);
-        //m_fpsCtrl.gameObject.transform.position = new Vector3(x, y, z);
-
-        SwitchPlayerCharacter();
+        float z = Random.Range(5, 95);
+        m_fpsCtrl.gameObject.transform.position = new Vector3(x, y, z);
     }
     /// <summary>
     /// Game scene(map) load method (Coroutine)
@@ -207,10 +208,11 @@ public class GameController : MonoBehaviour {
         sbPosRot.Length = 0;
         //Append player's position and rotation value to stringbuilder
         Transform playerT = m_fpsCtrl.gameObject.transform;
-        sbPosRot.AppendFormat("{0},{1},{2},{3},{4},{5},{6},{7},{8}",    //Position(x, y, z), Rotation(x, y, z, w -> Quaternion), OnGround, Flash
-            playerT.position.x, playerT.position.y, playerT.position.z,
-            playerT.rotation.x, playerT.rotation.y, playerT.rotation.z, playerT.rotation.w,
-            m_fpsCtrl.m_Animator.GetBool("OnGround"), isFlashOn);
+        if(playerState != PlayerState.Dead)
+            sbPosRot.AppendFormat("{0},{1},{2},{3},{4},{5},{6},{7},{8}",    //Position(x, y, z), Rotation(x, y, z, w -> Quaternion), OnGround, Flash
+                playerT.position.x, playerT.position.y, playerT.position.z,
+                playerT.rotation.x, playerT.rotation.y, playerT.rotation.z, playerT.rotation.w,
+                m_fpsCtrl.m_Animator.GetBool("OnGround"), isFlashOn);
 
         //Push position and rotation value
         if(client != null) client.positionRotation = sbPosRot.ToString();
@@ -220,7 +222,15 @@ public class GameController : MonoBehaviour {
             int rotateTime = client.rotateTimeLeft;
             txtRotateLeftTime.text = Mathf.Clamp(client.rotateTimeLeft, 0, 100).ToString();
             txtVRRotateLeftTime.text = Mathf.Clamp(client.rotateTimeLeft, 0, 100).ToString();
-            if (rotateTime < 0) SwitchPlayerCharacter();
+            if (rotateTime < 0)
+            {
+                if (!isCharacterSwitched)
+                {
+                    SwitchPlayerCharacter();
+                    isCharacterSwitched = true;
+                }
+            }
+            else isCharacterSwitched = false;
 
             if (client.userState != playerState)
             {
@@ -236,6 +246,7 @@ public class GameController : MonoBehaviour {
                     humanFPSObj.SetActive(false);
                     humanObj.SetActive(false);
                     m_fpsCtrl.gameObject.GetComponent<DeathCamController>().enabled = true;
+                    m_fpsCtrl.gameObject.GetComponent<CharacterController>().enabled = false;
                     m_fpsCtrl.enabled = false;
 
                 }
@@ -303,6 +314,7 @@ public class GameController : MonoBehaviour {
                     m_fpsCtrl.transform.position = new Vector3(m_fpsCtrl.transform.position.x, 10, m_fpsCtrl.transform.position.z);
                     //role rotation timer start!!
                     StartCoroutine(gameManager.ReceiveRotatePlayerRoleTimer());
+                    SwitchPlayerCharacter();
                     print("Game start");
                 }
 

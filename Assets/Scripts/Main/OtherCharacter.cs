@@ -112,46 +112,49 @@ public class OtherCharacter : MonoBehaviour {
                 }
             }
 
-            oldPos = gameObject.transform.position;
-            oldRot = gameObject.transform.rotation;
-            gameObject.transform.position = Vector3.Lerp(oldPos, clientInfo.userPosition, Time.deltaTime*5);
-            gameObject.transform.rotation = Quaternion.Slerp(oldRot, clientInfo.userRotation, Time.deltaTime*5);
-
-            //jumping/landing
-            bool oldOnGround = m_animator.GetBool("OnGround");
-            m_animator.SetBool("OnGround", clientInfo.userIsOnGround);
-            if(oldOnGround != clientInfo.userIsOnGround)
+            if (playerState != PlayerState.Dead)
             {
-                if (clientInfo.userIsOnGround) audioSource.PlayOneShot(audioLand);
-                else audioSource.PlayOneShot(audioJump);
-            }
+                oldPos = gameObject.transform.position;
+                oldRot = gameObject.transform.rotation;
 
-            //Set animation's variables by player's velocity, etc.
-            float velX, velZ;
-            velX = Mathf.Lerp(oldVelX, -(oldPos.x - gameObject.transform.position.x), 0.8f);
-            velZ = Mathf.Lerp(oldVelZ, -(oldPos.z - gameObject.transform.position.z), 0.8f);
-            oldVelX = velX; oldVelZ = velZ;
-            m_animator.SetFloat("Side", velX / Time.deltaTime);
-            m_animator.SetFloat("Forward", velZ / Time.deltaTime);
+                gameObject.transform.position = Vector3.Lerp(oldPos, clientInfo.userPosition, Time.deltaTime * 5);
+                gameObject.transform.rotation = Quaternion.Slerp(oldRot, clientInfo.userRotation, Time.deltaTime * 5);
 
-            if (clientInfo.userIsAttack)
-            {
-                if (playerState == PlayerState.Zombie)
+                //jumping/landing
+                bool oldOnGround = m_animator.GetBool("OnGround");
+                m_animator.SetBool("OnGround", clientInfo.userIsOnGround);
+                if (oldOnGround != clientInfo.userIsOnGround)
                 {
-                    m_animator.SetTrigger("OnAttack");
-                    audioSource.PlayOneShot(audioAttack);
+                    if (clientInfo.userIsOnGround) audioSource.PlayOneShot(audioLand);
+                    else audioSource.PlayOneShot(audioJump);
                 }
-                clientInfo.userIsAttack = false;
-            }
 
-            //Flash on/off
-            if(clientInfo.userIsFlashOn != isFlashOn)
-            {
-                isFlashOn = clientInfo.userIsFlashOn;
-                FlashObj.SetActive(isFlashOn);
-                audioSource.PlayOneShot(audioFlash);
-            }
+                //Set animation's variables by player's velocity, etc.
+                float velX, velZ;
+                velX = Mathf.Lerp(oldVelX, -(oldPos.x - gameObject.transform.position.x), 0.8f);
+                velZ = Mathf.Lerp(oldVelZ, -(oldPos.z - gameObject.transform.position.z), 0.8f);
+                oldVelX = velX; oldVelZ = velZ;
+                m_animator.SetFloat("Side", velX / Time.deltaTime);
+                m_animator.SetFloat("Forward", velZ / Time.deltaTime);
 
+                if (clientInfo.userIsAttack)
+                {
+                    if (playerState == PlayerState.Zombie)
+                    {
+                        m_animator.SetTrigger("OnAttack");
+                        audioSource.PlayOneShot(audioAttack);
+                    }
+                    clientInfo.userIsAttack = false;
+                }
+
+                //Flash on/off
+                if (clientInfo.userIsFlashOn != isFlashOn)
+                {
+                    isFlashOn = clientInfo.userIsFlashOn;
+                    FlashObj.SetActive(isFlashOn);
+                    audioSource.PlayOneShot(audioFlash);
+                }
+            }
             //Player name rotation
             txtName.gameObject.transform.LookAt(Camera.main.transform);
 

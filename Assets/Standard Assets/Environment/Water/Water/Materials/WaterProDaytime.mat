@@ -246,10 +246,10 @@ Material:
       second: 0.02
     - first:
         name: _ReflDistort
-      second: 0.71
+      second: 0
     - first:
         name: _RefrDistort
-      second: 0.729
+      second: 0
     - first:
         name: _Rotation
       second: 0
@@ -273,7 +273,7 @@ Material:
       second: 0
     - first:
         name: _WaveScale
-      second: 0.1073
+      second: 0.0486
     - first:
         name: _ZWrite
       second: 1

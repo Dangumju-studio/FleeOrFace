@@ -89,24 +89,26 @@ public class IngameManager : MonoBehaviour {
     {
         print("role distribute start");
         if (!server.isServerOpened) return;
-        int half = server.clientLists.FindAll(c => c.userState != PlayerState.Dead).Count / 2;
-        for (int i = 0; i < server.clientLists.Count; i++)
+        List<ClientInfo> survivor = server.clientLists.FindAll(c => c.userState != PlayerState.Dead);
+        int half = survivor.Count / 2;
+        int cnt = 0;
+        foreach(ClientInfo c in survivor)
         {
-            if (server.clientLists[i].userState == PlayerState.Dead) continue;
-            if (i < half) server.clientLists[i].userState = PlayerState.Human;
-            else server.clientLists[i].userState = PlayerState.Zombie;
+            if (cnt++ < half) c.userState = PlayerState.Human;
+            else c.userState = PlayerState.Zombie;
         }
+
         //mix(shuffle)
         System.Random rnd = new System.Random();
-        int n = server.clientLists.Count;
+        int n = survivor.Count;
         while (n > 1)
         {
             n--;
             int k = rnd.Next(n + 1);
-            int ps = (int)server.clientLists[k].userState;
-            if (server.clientLists[k].userState == PlayerState.Dead || server.clientLists[n].userState == PlayerState.Dead) continue;
-            server.clientLists[k].userState = (PlayerState)((int)server.clientLists[n].userState);
-            server.clientLists[n].userState = (PlayerState)ps;
+            int ps = (int)survivor[k].userState;
+            if (survivor[k].userState == PlayerState.Dead || survivor[n].userState == PlayerState.Dead) continue;
+            survivor[k].userState = (PlayerState)((int)survivor[n].userState);
+            survivor[n].userState = (PlayerState)ps;
         }
         //Send role information to clients
         System.Text.StringBuilder sb = new System.Text.StringBuilder();

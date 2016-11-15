@@ -206,13 +206,16 @@ public class Client : MonoBehaviour {
 
                 case NetCommand.PositionRotation:
                     cInfo = ClientInfo.findClientInfo(ref clientLists, msgReceived.identify);
-                    values = msgReceived.msg.Split(new char[] { ',' });
-                    if (cInfo != null)
+                    if (cInfo.userState != PlayerState.Dead)
                     {
-                        cInfo.userPosition = new Vector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
-                        cInfo.userRotation = new Quaternion(float.Parse(values[3]), float.Parse(values[4]), float.Parse(values[5]), float.Parse(values[6]));
-                        cInfo.userIsOnGround = bool.Parse(values[7]);
-                        cInfo.userIsFlashOn = bool.Parse(values[8]);
+                        values = msgReceived.msg.Split(new char[] { ',' });
+                        if (cInfo != null)
+                        {
+                            cInfo.userPosition = new Vector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
+                            cInfo.userRotation = new Quaternion(float.Parse(values[3]), float.Parse(values[4]), float.Parse(values[5]), float.Parse(values[6]));
+                            cInfo.userIsOnGround = bool.Parse(values[7]);
+                            cInfo.userIsFlashOn = bool.Parse(values[8]);
+                        }
                     }
                     break;
 
@@ -226,9 +229,7 @@ public class Client : MonoBehaviour {
                     //Set victim's userstate
                     if(msgReceived.msg.Length > 0)
                         if (identification == msgReceived.msg)
-                        {
                             userState = PlayerState.Dead;
-                        }
                         else
                         {
                             cInfo = ClientInfo.findClientInfo(ref clientLists, msgReceived.msg);
