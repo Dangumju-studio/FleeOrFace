@@ -2,8 +2,8 @@
 using System.Collections;
 
 public class WaterManager : MonoBehaviour {
-    public GameObject water;
-    public GameObject wind;
+    public GameObject water;// 물 바깥 사운드
+    public GameObject wind; // 바람 사운드
     public GameObject[] wateroutsound;
     public GameObject waterUp;
     public GameObject diving;
