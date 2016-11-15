@@ -80,9 +80,6 @@ public class GameController : MonoBehaviour {
     //is Paused?
     public bool isPause = false;
 
-    //Prevent multiple character switching glitch
-    bool isCharacterSwitched = false;
-
     // Use this for initialization
     void Start () {
         //Hide all menu ui
@@ -222,15 +219,12 @@ public class GameController : MonoBehaviour {
             int rotateTime = client.rotateTimeLeft;
             txtRotateLeftTime.text = Mathf.Clamp(client.rotateTimeLeft, 0, 100).ToString();
             txtVRRotateLeftTime.text = Mathf.Clamp(client.rotateTimeLeft, 0, 100).ToString();
-            if (rotateTime < 0)
+
+            if (isGameStart && client.isRoleRotated)
             {
-                if (!isCharacterSwitched)
-                {
-                    SwitchPlayerCharacter();
-                    isCharacterSwitched = true;
-                }
+                SwitchPlayerCharacter();
+                client.isRoleRotated = false;
             }
-            else isCharacterSwitched = false;
 
             if (client.userState != playerState)
             {
@@ -485,6 +479,9 @@ public class GameController : MonoBehaviour {
             ci.isLoadingDone = false;
             ci.userState = PlayerState.None;
         }
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
         UnityEngine.SceneManagement.SceneManager.LoadScene("room");
     }

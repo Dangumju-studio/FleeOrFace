@@ -30,6 +30,11 @@ public class Client : MonoBehaviour {
     /// the game winner. Assigned when game is end.
     /// </summary>
     public string strWinner = "";
+    /// <summary>
+    /// Turn to true when role rotated.
+    /// After rotating, this will be false.
+    /// </summary>
+    public bool isRoleRotated = false;
 
     const int SERVER_TIMEOUT = 15;
 
@@ -243,7 +248,7 @@ public class Client : MonoBehaviour {
 
                 case NetCommand.RoleRotate:
                     values = msgReceived.msg.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach(string s in values)
+                    foreach (string s in values)
                     {
                         string cur_identification = s.Substring(0, s.IndexOf(':'));
                         int role = int.Parse(s.Substring(s.IndexOf(':') + 1, s.Length - s.IndexOf(':')-1));
@@ -253,6 +258,7 @@ public class Client : MonoBehaviour {
                         if (cur_identification == identification)
                             userState = (PlayerState)role;
                     }
+                    isRoleRotated = true;
                     break;
 
                 //GAME OVER
