@@ -42,6 +42,8 @@ public class WaitingRoom : MonoBehaviour {
             chk3rdcam.interactable = true;
         }
 
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
         playerInfoList = new List<PlayerInfo>();
         myPlayerName.text = client.playerName;
