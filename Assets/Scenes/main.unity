@@ -4092,7 +4092,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8370cc0c68730634fa79a47f2842ebf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DEBUGGING_MODE: 0
+  DEBUGGING_MODE: 1
   isThirdPersonCamera: 0
   m_PlayerCamera: {fileID: 1081847222}
   m_fpsCtrl: {fileID: 1868779870}
@@ -8045,8 +8045,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 279f5258579a64e4c9499a0f7b394e9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 50
-  rotSpeed: 10
 --- !u!1 &1874413455
 GameObject:
   m_ObjectHideFlags: 0
