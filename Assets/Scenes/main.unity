@@ -4104,6 +4104,8 @@ MonoBehaviour:
   humanFPSObj: {fileID: 1616070871}
   humanObjRenderer: {fileID: 491279935}
   humanFPSObjRenderer: {fileID: 66597610}
+  playerRagdollObj: {fileID: 1000012225850676, guid: a8340f69a0ca0b04695996a62e47e08c,
+    type: 2}
   m_imgLoading: {fileID: 2050648048}
   m_pnLoadingBG: {fileID: 145989052}
   m_pnIngameUI: {fileID: 1874413455}
@@ -4126,7 +4128,7 @@ MonoBehaviour:
   playerState: 3
   audioThunder: {fileID: 8300000, guid: 8f1da74cddff1564793a74249b8a252a, type: 3}
   audioFlash: {fileID: 8300000, guid: 7694d9fb8e53093499cc0b5f7997cad6, type: 3}
-  audioAttack: {fileID: 0}
+  audioAttack: {fileID: 8300000, guid: a687e42c92d88544787de9aec813b7bd, type: 3}
   playerCharPrefab: {fileID: 1000013336002630, guid: 5ce8089526af7cf4585a9e01a1f09910,
     type: 2}
   FlashObj: {fileID: 361160394}

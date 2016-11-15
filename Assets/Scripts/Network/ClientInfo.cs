@@ -55,6 +55,7 @@ public class ClientInfo
     public bool userIsFlashOn;
     /// <summary>
     /// User Attack. (When this true, this will change to false immediately and Character will attack.)
+    /// Command message is a player's identification string which is attacked.
     /// </summary>
     public bool userIsAttack;
     /// <summary>

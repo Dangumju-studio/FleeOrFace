@@ -8,7 +8,6 @@ TagManager:
   - Sunlight
   - OtherPlayer
   - NetworkController
-  - Water
   layers:
   - Default
   - TransparentFX

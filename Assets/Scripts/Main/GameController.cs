@@ -18,6 +18,7 @@ public class GameController : MonoBehaviour {
     [SerializeField] SkinnedMeshRenderer zombieObjRenderer, zombieFPSObjRenderer;
     [SerializeField] GameObject humanObj, humanFPSObj;
     [SerializeField] SkinnedMeshRenderer humanObjRenderer, humanFPSObjRenderer;
+    [SerializeField] GameObject playerRagdollObj;
     #endregion
 
     #region Canvas Gameobjects
@@ -211,7 +212,13 @@ public class GameController : MonoBehaviour {
             if (client.userState != playerState)
             {
                 playerState = client.userState;
-                SwitchPlayerCharacter();
+                if(playerState == PlayerState.Dead)
+                {
+                    //put ragdoll.
+                    GameObject ragdoll = Instantiate(playerRagdollObj, m_fpsCtrl.gameObject.transform.position, m_fpsCtrl.gameObject.transform.rotation) as GameObject;
+                }
+                else 
+                    SwitchPlayerCharacter();
             }
         }
 

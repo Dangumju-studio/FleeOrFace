@@ -4511,6 +4511,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: 
   playerIdentification: 
+  playerState: 0
   zombie: {fileID: 1000010590574662}
   human: {fileID: 1000012348903054}
   FlashObj: {fileID: 1000011150509880}
@@ -4523,8 +4524,9 @@ MonoBehaviour:
   audioJump: {fileID: 8300000, guid: 5897aeed9b676024fbb8c694b421a861, type: 3}
   audioLand: {fileID: 8300000, guid: 3b09d59f4499d45428baa7a21e954296, type: 3}
   audioFlash: {fileID: 8300000, guid: 7694d9fb8e53093499cc0b5f7997cad6, type: 3}
-  audioWater: {fileID: 8300000, guid: e6ed0f9a07deb4947a12c179b295270e, type: 3}
-  audioAttack: {fileID: 0}
+  audioWaterIn: {fileID: 8300000, guid: e6ed0f9a07deb4947a12c179b295270e, type: 3}
+  audioWaterOut: {fileID: 8300000, guid: e6ed0f9a07deb4947a12c179b295270e, type: 3}
+  audioAttack: {fileID: 8300000, guid: a687e42c92d88544787de9aec813b7bd, type: 3}
 --- !u!135 &135000010493160902
 SphereCollider:
   m_ObjectHideFlags: 1

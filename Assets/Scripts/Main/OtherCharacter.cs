@@ -16,7 +16,7 @@ public class OtherCharacter : MonoBehaviour {
     /// <summary>
     /// This player's state
     /// </summary>
-    PlayerState playerState;
+    public PlayerState playerState;
 
     Client client;
     ClientInfo clientInfo;
@@ -49,7 +49,7 @@ public class OtherCharacter : MonoBehaviour {
         //Get client
         client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
         m_animator = zombie.GetComponent<Animator>();
-        clientInfo = client.clients.Find(cc => cc.name.Equals(playerName) && cc.identification.Equals(playerIdentification));
+        clientInfo = client.clients.Find(cc => cc.identification.Equals(playerIdentification));
 
         //disable ragdall
         foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
@@ -166,7 +166,7 @@ public class OtherCharacter : MonoBehaviour {
     /// <returns></returns>
     IEnumerator WalkingSound()
     {
-        while(true)
+        while(playerState == PlayerState.Zombie || playerState == PlayerState.Human)
             if (clientInfo.userIsOnGround && !isUnderwater)
             {
                 float vX = Mathf.Abs(oldVelX), vZ = Mathf.Abs(oldVelZ);

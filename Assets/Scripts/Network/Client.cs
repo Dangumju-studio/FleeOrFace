@@ -107,7 +107,7 @@ public class Client : MonoBehaviour {
             {
                 case NetCommand.Connect:
                     //Connect success
-                    if( msgReceived.identify == identification)
+                    if (msgReceived.identify == identification)
                     {
                         isConnected = true;
                         SendData(NetCommand.Check, "");
@@ -139,7 +139,7 @@ public class Client : MonoBehaviour {
                 case NetCommand.Check:
                     //Check success, Modify ClientList(clients)
                     string[] players = msgReceived.msg.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach(string s in players)
+                    foreach (string s in players)
                     {
                         string[] pStr = s.Split(new char[] { ':' });
                         ClientInfo ci = clients.Find(c => c.identification.Equals(pStr[1]));
@@ -158,7 +158,7 @@ public class Client : MonoBehaviour {
                     }
 
                     //remove ClientInfo in ClientList(clients) if it had removed from server.
-                    for(int i=0; i < clients.Count; i++)
+                    for (int i = 0; i < clients.Count; i++)
                     {
                         //find current clientinfo in server's message. if it doesn't exist, remove this clientinfo.
                         if (Array.Find<string>(players, s => s.Substring(0, s.LastIndexOf(':')).Equals(string.Format("{0}:{1}", clients[i].name, clients[i].identification))) == null)
@@ -193,7 +193,7 @@ public class Client : MonoBehaviour {
                 case NetCommand.PositionRotation:
                     cInfo = clients.Find(c => c.identification == msgReceived.identify);
                     values = msgReceived.msg.Split(new char[] { ',' });
-                    if(cInfo != null)
+                    if (cInfo != null)
                     {
                         cInfo.userPosition = new Vector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
                         cInfo.userRotation = new Quaternion(float.Parse(values[3]), float.Parse(values[4]), float.Parse(values[5]), float.Parse(values[6]));
@@ -203,10 +203,23 @@ public class Client : MonoBehaviour {
                     break;
 
                 case NetCommand.Attack:
+                    //Set attacker's attack state
                     cInfo = clients.Find(c => c.identification == msgReceived.identify);
-                    if(cInfo != null)
-                        cInfo.userIsAttack = true;
+                    if (cInfo != null)
+                        if (cInfo.identification != identification)
+                            cInfo.userIsAttack = true;
 
+                    //Set victim's userstate
+                    if (identification == msgReceived.msg)
+                    {
+                        userState = PlayerState.Dead;
+
+                    }
+                    else
+                    {
+                        cInfo = clients.Find(c => c.identification == msgReceived.msg);
+                        if (cInfo != null) cInfo.userState = PlayerState.Dead;
+                    }
                     break;
 
                 case NetCommand.TimeCount:

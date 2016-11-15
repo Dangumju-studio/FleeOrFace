@@ -203,26 +203,34 @@ public class Server : MonoBehaviour {
                 
                 //Attack
                 case NetCommand.Attack:
-                    foreach (ClientInfo c in clients)
-                    {
-                        if (c.ep.Equals(epSender)) continue;
-                        udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
-                    }
-
                     //Attack - Kill check
                     cInfo = clients.Find(c => c.ep.Equals(epSender));
+                    string attacked = "";
                     if (cInfo.userState == PlayerState.Zombie)
                     {
-                        string attacked = "";
+                        //Get attacked player's identification string.
                         if (cInfo != null) attacked = gameManager.AttackCheck(ref cInfo);
                         if (attacked.Length > 0)
                         {
+                            //Get attacked player via attacked identification string.
                             ClientInfo cInfo2 = clients.Find(c => c.identification == attacked);
                             if (cInfo2 != null)
                             {
-                                print(cInfo2.name + " has attacked by " + cInfo.name);
+                                if (cInfo2.userState == PlayerState.Human)
+                                {
+                                    print(cInfo2.name + " has attacked by " + cInfo.name);
+                                    cInfo2.userState = PlayerState.Dead;
+                                }
                             }
                         }
+                    }
+                    dataToSend = new NetworkData(msg);
+                    dataToSend.msg = attacked;
+                    msg = dataToSend.ConvertToByte();
+                    foreach (ClientInfo c in clients)
+                    {
+                        //if (c.ep.Equals(epSender)) continue;
+                        udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
                 //Moving/Turning
@@ -241,6 +249,10 @@ public class Server : MonoBehaviour {
                         if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
+                    break;
+                //GAME OVER
+                case NetCommand.Gameover:
+
                     break;
             }
         }
