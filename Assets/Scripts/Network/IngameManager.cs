@@ -106,7 +106,7 @@ public class IngameManager : MonoBehaviour {
             n--;
             int k = rnd.Next(n + 1);
             int ps = (int)survivor[k].userState;
-            if (survivor[k].userState == PlayerState.Dead || survivor[n].userState == PlayerState.Dead) continue;
+            //if (survivor[k].userState == PlayerState.Dead || survivor[n].userState == PlayerState.Dead) continue;
             survivor[k].userState = (PlayerState)((int)survivor[n].userState);
             survivor[n].userState = (PlayerState)ps;
         }
@@ -117,7 +117,7 @@ public class IngameManager : MonoBehaviour {
         server.NoticeData(NetCommand.RoleRotate, sb.ToString());
 
         lastRotatedTime = System.DateTime.Now;
-        rotateTimeTerm = rnd.Next(10, 12); //32);
+        rotateTimeTerm = rnd.Next(10, 20); //32);
     }
 
     /// <summary>

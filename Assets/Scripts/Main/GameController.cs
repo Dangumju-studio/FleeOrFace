@@ -96,6 +96,7 @@ public class GameController : MonoBehaviour {
         if (!DEBUGGING_MODE)
         {
             client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
+            client.userState = PlayerState.None;
             gameManager = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<IngameManager>();
             isThirdPersonCamera = gameManager.is3rdCam;
         }
@@ -220,9 +221,11 @@ public class GameController : MonoBehaviour {
             txtRotateLeftTime.text = Mathf.Clamp(client.rotateTimeLeft, 0, 100).ToString();
             txtVRRotateLeftTime.text = Mathf.Clamp(client.rotateTimeLeft, 0, 100).ToString();
 
+            SwitchPlayerCharacter();
             if (isGameStart && client.isRoleRotated)
             {
-                SwitchPlayerCharacter();
+                sceneAudio.PlayOneShot(audioThunder);
+                StartCoroutine(SwitchPlayerThunder());
                 client.isRoleRotated = false;
             }
 
@@ -309,6 +312,8 @@ public class GameController : MonoBehaviour {
                     //role rotation timer start!!
                     StartCoroutine(gameManager.ReceiveRotatePlayerRoleTimer());
                     SwitchPlayerCharacter();
+                    sceneAudio.PlayOneShot(audioThunder);
+                    StartCoroutine(SwitchPlayerThunder());
                     print("Game start");
                 }
 
@@ -389,8 +394,6 @@ public class GameController : MonoBehaviour {
     /// </summary>
     void SwitchPlayerCharacter()
     {
-        sceneAudio.PlayOneShot(audioThunder);
-        StartCoroutine(SwitchPlayerThunder());
         switch (playerState)
         {
             case PlayerState.Human:

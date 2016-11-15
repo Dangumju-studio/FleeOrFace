@@ -192,6 +192,8 @@ public class Server : MonoBehaviour {
                     cInfo = clientLists.Find(c => c.isLoadingDone == false);
                     if (cInfo == null)
                     {
+                        foreach (ClientInfo c in clientLists)
+                            c.userState = PlayerState.None;
                         gameManager.isGamePlaying = true;
                         gameManager.Initialize();
                         dataToSend.cmd = NetCommand.StartGame;
@@ -349,5 +351,10 @@ public class Server : MonoBehaviour {
         byte[] bData = newMessage.ConvertToByte();
         foreach (ClientInfo c in clientLists)
             udpServer.BeginSendTo(bData, 0, bData.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), null);
+    }
+
+    void OnApplicationQuit()
+    {
+        CloseServer();
     }
 }
