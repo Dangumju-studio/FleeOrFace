@@ -46,6 +46,15 @@ public class IngameManager : MonoBehaviour {
     /// </summary>
     private System.DateTime lastRotatedTime;
 
+    /// <summary>
+    /// Attack range.
+    /// </summary>
+    private readonly float ATTACK_RANGE = 1.3f;
+    /// <summary>
+    /// Attack angle range
+    /// </summary>
+    private readonly float ATTACK_ANGLE_RANGE = 10;
+
     void Start()
     {
         server = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Server>();
@@ -143,9 +152,9 @@ public class IngameManager : MonoBehaviour {
             print(c.userPosition);
             print(attacker.userPosition);
             print((c.userPosition - attacker.userPosition).sqrMagnitude);
-            if((c.userPosition - attacker.userPosition).sqrMagnitude < 1)
+            if((c.userPosition - attacker.userPosition).sqrMagnitude < ATTACK_RANGE)
             {
-                if(Vector3.Angle(attacker.userRotation * Vector3.forward, c.userPosition - attacker.userPosition) < 10)
+                if(Vector3.Angle(attacker.userRotation * Vector3.forward, c.userPosition - attacker.userPosition) < ATTACK_ANGLE_RANGE)
                 {
                     attacked = c.identification;
                     break;

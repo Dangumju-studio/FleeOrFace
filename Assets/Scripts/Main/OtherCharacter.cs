@@ -31,7 +31,9 @@ public class OtherCharacter : MonoBehaviour {
     [SerializeField] AudioClip audioJump;
     [SerializeField] AudioClip audioLand;
     [SerializeField] AudioClip audioFlash;
-    [SerializeField] AudioClip audioWater;
+    [SerializeField] AudioClip audioWaterIn;
+    [SerializeField] AudioClip audioWaterOut;
+    [SerializeField] AudioClip audioAttack;
     #endregion
     AudioSource audioSource;
 
@@ -40,6 +42,7 @@ public class OtherCharacter : MonoBehaviour {
     float oldVelX, oldVelZ;
 
     bool isFlashOn = false;
+    bool isUnderwater = false;
 
 	// Use this for initialization
 	void Start () {
@@ -47,6 +50,12 @@ public class OtherCharacter : MonoBehaviour {
         client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
         m_animator = zombie.GetComponent<Animator>();
         clientInfo = client.clients.Find(cc => cc.name.Equals(playerName) && cc.identification.Equals(playerIdentification));
+
+        //disable ragdall
+        foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
+            rb.isKinematic = true;
+        foreach (Collider cd in GetComponentsInChildren<Collider>())
+            cd.enabled = false;
 
         //Player name
         txtName.text = playerName;
@@ -64,7 +73,7 @@ public class OtherCharacter : MonoBehaviour {
         if(clientInfo == null || !clientInfo.isConnected)
         {
             print(playerName + " disconnected");
-            Destroy(this.gameObject);
+            Destroy(gameObject);
             return;
         }
         try
@@ -87,9 +96,18 @@ public class OtherCharacter : MonoBehaviour {
                         break;
                     case PlayerState.Dead:
                         //DEATH EFFECT
-                        Destroy(this.gameObject);
+                        human.SetActive(true);
+                        zombie.SetActive(false);
+                        m_animator = human.GetComponent<Animator>();
+                        m_animator.enabled = false;
+                        foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
+                            rb.isKinematic = false;
+                        foreach (Collider cd in GetComponentsInChildren<Collider>())
+                            cd.enabled = true;
                         return;
-                        break;
+                    case PlayerState.None:
+                        Destroy(gameObject);
+                        return;
                 }
             }
 
@@ -117,7 +135,11 @@ public class OtherCharacter : MonoBehaviour {
 
             if (clientInfo.userIsAttack)
             {
-                m_animator.SetTrigger("OnAttack");
+                if (playerState == PlayerState.Zombie)
+                {
+                    m_animator.SetTrigger("OnAttack");
+                    audioSource.PlayOneShot(audioAttack);
+                }
                 clientInfo.userIsAttack = false;
             }
 
@@ -131,6 +153,7 @@ public class OtherCharacter : MonoBehaviour {
 
             //Player name rotation
             txtName.gameObject.transform.LookAt(Camera.main.transform);
+
         } catch (System.Exception e)
         {
             print(e.Message);
@@ -144,7 +167,7 @@ public class OtherCharacter : MonoBehaviour {
     IEnumerator WalkingSound()
     {
         while(true)
-            if (clientInfo.userIsOnGround)
+            if (clientInfo.userIsOnGround && !isUnderwater)
             {
                 float vX = Mathf.Abs(oldVelX), vZ = Mathf.Abs(oldVelZ);
                 if (vX > 8 || vZ > 8)
@@ -167,5 +190,22 @@ public class OtherCharacter : MonoBehaviour {
     void OnDestroy()
     {
         StopCoroutine(WalkingSound());
+    }
+
+    /// <summary>
+    /// Water enter sound play method. Called from map water manager.
+    /// </summary>
+    public void OnWaterEnter()
+    {
+        isUnderwater = true;
+        audioSource.PlayOneShot(audioWaterIn);
+    }
+    /// <summary>
+    /// Water out sound play method. Called from map water manager.
+    /// </summary>
+    public void OnWaterLeave()
+    {
+        isUnderwater = false;
+        audioSource.PlayOneShot(audioWaterOut);
     }
 }

@@ -309,6 +309,9 @@ public class Client : MonoBehaviour {
     public void SendPlayerControl()
     {
         SendData(NetCommand.PositionRotation, positionRotation);
-        if (attack) { SendData(NetCommand.Attack, "True"); attack = false; }
+        if (attack) {
+            if (userState == PlayerState.Zombie) SendData(NetCommand.Attack, "True");
+            attack = false;
+        }
     }
 }

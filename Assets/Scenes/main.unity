@@ -4092,7 +4092,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8370cc0c68730634fa79a47f2842ebf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DEBUGGING_MODE: 0
+  DEBUGGING_MODE: 1
   isThirdPersonCamera: 0
   m_PlayerCamera: {fileID: 1081847222}
   m_fpsCtrl: {fileID: 1868779870}
@@ -4126,6 +4126,7 @@ MonoBehaviour:
   playerState: 3
   audioThunder: {fileID: 8300000, guid: 8f1da74cddff1564793a74249b8a252a, type: 3}
   audioFlash: {fileID: 8300000, guid: 7694d9fb8e53093499cc0b5f7997cad6, type: 3}
+  audioAttack: {fileID: 0}
   playerCharPrefab: {fileID: 1000013336002630, guid: 5ce8089526af7cf4585a9e01a1f09910,
     type: 2}
   FlashObj: {fileID: 361160394}

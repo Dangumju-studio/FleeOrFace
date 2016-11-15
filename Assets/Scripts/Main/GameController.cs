@@ -49,10 +49,13 @@ public class GameController : MonoBehaviour {
     IngameManager gameManager;
     public PlayerState playerState;
 
+    #region audio clip/sources
     [SerializeField] AudioClip audioThunder;
     [SerializeField] AudioClip audioFlash;
+    [SerializeField] AudioClip audioAttack;
     AudioSource sceneAudio;
-    
+    #endregion
+
     /// <summary>
     /// Other player's object prefab
     /// </summary>
@@ -372,18 +375,21 @@ public class GameController : MonoBehaviour {
     }
     IEnumerator SwitchPlayerThunder()
     {
-        Light light = GameObject.FindGameObjectWithTag("Sunlight").GetComponent<Light>();
-        light.intensity = 6f;
-        yield return new WaitForSeconds(0.1f);
-        light.intensity = 0.5f;
-        yield return new WaitForSeconds(0.1f);
-        light.intensity = 5f;
-
-        while (light.intensity > 0.8f)
+        if (isGameStart)
         {
-            light.intensity -= 0.2f;
-            yield return new WaitForSeconds(0.05f);
+            Light light = GameObject.FindGameObjectWithTag("Sunlight").GetComponent<Light>();
+            light.intensity = 6f;
+            yield return new WaitForSeconds(0.1f);
+            light.intensity = 0.5f;
+            yield return new WaitForSeconds(0.1f);
+            light.intensity = 5f;
+
+            while (light.intensity > 0.8f)
+            {
+                light.intensity -= 0.2f;
+                yield return new WaitForSeconds(0.05f);
+            }
+            light.intensity = 0.8f;
         }
-        light.intensity = 0.8f;
     }
 }

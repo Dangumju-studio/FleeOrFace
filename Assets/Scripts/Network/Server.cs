@@ -211,9 +211,19 @@ public class Server : MonoBehaviour {
 
                     //Attack - Kill check
                     cInfo = clients.Find(c => c.ep.Equals(epSender));
-                    string attacked = "";
-                    if(cInfo != null) attacked = gameManager.AttackCheck(ref cInfo);
-                    if (attacked.Length > 0) print(attacked + " has attacked!!");
+                    if (cInfo.userState == PlayerState.Zombie)
+                    {
+                        string attacked = "";
+                        if (cInfo != null) attacked = gameManager.AttackCheck(ref cInfo);
+                        if (attacked.Length > 0)
+                        {
+                            ClientInfo cInfo2 = clients.Find(c => c.identification == attacked);
+                            if (cInfo2 != null)
+                            {
+                                print(cInfo2.name + " has attacked by " + cInfo.name);
+                            }
+                        }
+                    }
                     break;
                 //Moving/Turning
                 case NetCommand.PositionRotation:

@@ -37,7 +37,6 @@ public class ClientInfo
     /// Game scene loading state
     /// </summary>
     public bool isLoadingDone;
-
     /// <summary>
     /// User character position
     /// </summary>
@@ -58,6 +57,10 @@ public class ClientInfo
     /// User Attack. (When this true, this will change to false immediately and Character will attack.)
     /// </summary>
     public bool userIsAttack;
+    /// <summary>
+    /// Is this player in water?
+    /// </summary>
+    public bool isUnderWater;
     /// <summary>
     /// Player state (dead, zombie, human, none)
     /// </summary>
