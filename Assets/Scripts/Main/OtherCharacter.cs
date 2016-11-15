@@ -117,8 +117,8 @@ public class OtherCharacter : MonoBehaviour {
                 oldPos = gameObject.transform.position;
                 oldRot = gameObject.transform.rotation;
 
-                gameObject.transform.position = Vector3.Lerp(oldPos, clientInfo.userPosition, Time.deltaTime * 5);
-                gameObject.transform.rotation = Quaternion.Slerp(oldRot, clientInfo.userRotation, Time.deltaTime * 5);
+                gameObject.transform.position = Vector3.Lerp(oldPos, clientInfo.userPosition, Time.deltaTime * 10);
+                gameObject.transform.rotation = Quaternion.Slerp(oldRot, clientInfo.userRotation, Time.deltaTime * 10);
 
                 //jumping/landing
                 bool oldOnGround = m_animator.GetBool("OnGround");

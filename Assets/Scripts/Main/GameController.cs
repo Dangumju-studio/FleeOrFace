@@ -141,9 +141,9 @@ public class GameController : MonoBehaviour {
             StartCoroutine(LoadGameScene(gameManager.mapList[gameManager.mapNumber]));
 
         //Randomly located
-        float x = Random.Range(5, 95);
+        float x = Random.Range(10, 90);
         float y = 20;
-        float z = Random.Range(5, 95);
+        float z = Random.Range(10, 90);
         m_fpsCtrl.gameObject.transform.position = new Vector3(x, y, z);
     }
     /// <summary>
@@ -477,6 +477,7 @@ public class GameController : MonoBehaviour {
         client.isGamePlaying = false;
         client.isLoadingStarting = false;
         client.strWinner = "";
-        //UnityEngine.SceneManagement.SceneManager.LoadScene("room");
+        StopCoroutine(client.SendCheck());
+        UnityEngine.SceneManagement.SceneManager.LoadScene("room");
     }
 }

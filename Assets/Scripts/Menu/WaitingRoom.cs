@@ -95,7 +95,7 @@ public class WaitingRoom : MonoBehaviour {
         //Remove player or Modify player status from playerlist
         for(int i=0; i<playerInfoList.Count; i++)
         {
-            ClientInfo ci = client.clientLists.Find(c => c.identification.Equals(playerInfoList[i].identification));
+            ClientInfo ci = ClientInfo.findClientInfo(ref client.clientLists, playerInfoList[i].identification);
             //remove
             if(ci == null)
             {

@@ -3,8 +3,8 @@ using System.Collections;
 using UnityStandardAssets.CrossPlatformInput;
 public class DeathCamController : MonoBehaviour {
 
-    public float moveSpeed = 50;
-    public float rotSpeed = 10;
+    public float moveSpeed = 10;
+    public float rotSpeed = 60;
 
 	// Use this for initialization
 	void Start () {
@@ -12,19 +12,19 @@ public class DeathCamController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        float hor = CrossPlatformInputManager.GetAxis("Horizontal") * moveSpeed;
-        float ver = CrossPlatformInputManager.GetAxis("Vertical") * moveSpeed;
+        float hor = CrossPlatformInputManager.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
+        float ver = CrossPlatformInputManager.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
 
-        if(CrossPlatformInputManager.GetButtonDown("Dash"))
+        if(CrossPlatformInputManager.GetButton("Dash"))
         {
             hor *= 2;
             ver *= 2;
         }
 
-        float xRot = CrossPlatformInputManager.GetAxis("Mouse X") * rotSpeed;
-        float yRot = CrossPlatformInputManager.GetAxis("Mouse Y") * rotSpeed;
+        float xRot = CrossPlatformInputManager.GetAxis("Mouse X") * rotSpeed * Time.deltaTime;
+        float yRot = CrossPlatformInputManager.GetAxis("Mouse Y") * rotSpeed * Time.deltaTime;
 
-        transform.Rotate(xRot, yRot, 0);
+        transform.Rotate(yRot, xRot, 0,Space.World);
         transform.Translate(hor, 0, ver);
     }
 }
