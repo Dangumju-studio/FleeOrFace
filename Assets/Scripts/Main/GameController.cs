@@ -148,6 +148,12 @@ public class GameController : MonoBehaviour {
                 oc.playerIdentification = ci.identification;
             }
 
+        //Randomly located
+        float x = Random.Range(5, 195);
+        float y = 20;
+        float z = Random.Range(5, 195);
+        m_fpsCtrl.gameObject.transform.position = new Vector3(x, y, z);
+
         SwitchPlayerCharacter();
     }
     /// <summary>

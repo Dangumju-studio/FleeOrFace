@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Collections.Generic;
 using System;
 using System.Text;
+using System.Diagnostics;
 
 public class Server : MonoBehaviour {
 
@@ -272,7 +273,10 @@ public class Server : MonoBehaviour {
         }
         catch (Exception ex)
         {
+            StackTrace st = new StackTrace(ex, true);
+            StackFrame frame = st.GetFrame(0);
             print(ex.Message);
+            print(string.Format("{0} - {1} occured error ({2}:{3})", frame.GetFileName(), frame.GetMethod().Name, frame.GetFileLineNumber(), frame.GetFileColumnNumber()));
         }
         finally
         {

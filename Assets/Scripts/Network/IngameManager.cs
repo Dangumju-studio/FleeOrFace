@@ -71,16 +71,6 @@ public class IngameManager : MonoBehaviour {
             //Zombie or Human
             DistributeRole();
 
-            //Set each player's position and rotation
-            foreach(ClientInfo c in server.clientLists)
-            {
-                System.Random rnd = new System.Random();
-                float x = rnd.Next(5, 195);
-                float y = 20;
-                float z = rnd.Next(5, 195);
-                c.userPosition = new Vector3(x, y, z);
-            }
-
             //Receiving Role rotate timer start => in GameController.cs FixedUpdate() gamestart part. (cross thread..)
         }
         catch (System.Exception e)
