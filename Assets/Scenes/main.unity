@@ -1572,7 +1572,7 @@ GameObject:
   - 224: {fileID: 392917168}
   - 222: {fileID: 392917170}
   - 114: {fileID: 392917169}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: pnLoadingBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3938,7 +3938,7 @@ GameObject:
   - 222: {fileID: 995471040}
   - 114: {fileID: 995471039}
   - 114: {fileID: 995471038}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: txtStatus
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4092,7 +4092,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8370cc0c68730634fa79a47f2842ebf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DEBUGGING_MODE: 1
+  DEBUGGING_MODE: 0
   isThirdPersonCamera: 0
   m_PlayerCamera: {fileID: 1081847222}
   m_fpsCtrl: {fileID: 1868779870}
@@ -4370,7 +4370,7 @@ GameObject:
   - 224: {fileID: 1038014726}
   - 222: {fileID: 1038014728}
   - 114: {fileID: 1038014727}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: pnGameoverVR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5512,7 +5512,7 @@ GameObject:
   - 222: {fileID: 1377036516}
   - 114: {fileID: 1377036515}
   - 114: {fileID: 1377036514}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: txtMenuInVR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5662,7 +5662,7 @@ GameObject:
   - 224: {fileID: 1403982852}
   - 222: {fileID: 1403982854}
   - 114: {fileID: 1403982853}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: imgLoadingWrapper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5730,7 +5730,7 @@ GameObject:
   - 222: {fileID: 1413631233}
   - 114: {fileID: 1413631232}
   - 114: {fileID: 1413631234}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: txtMenuInVR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7157,6 +7157,20 @@ Prefab:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2037080, guid: 126d619cf4daa52469682f85c1378b4a, type: 2}
+      propertyPath: m_CullingMask.m_Bits
+      value: 4294966783
+      objectReference: {fileID: 0}
+    - target: {fileID: 20000012175207052, guid: 126d619cf4daa52469682f85c1378b4a,
+        type: 2}
+      propertyPath: m_CullingMask.m_Bits
+      value: 4294967263
+      objectReference: {fileID: 0}
+    - target: {fileID: 20000010189485334, guid: 126d619cf4daa52469682f85c1378b4a,
+        type: 2}
+      propertyPath: m_CullingMask.m_Bits
+      value: 4294967263
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 126d619cf4daa52469682f85c1378b4a, type: 2}
   m_IsPrefabParent: 0
@@ -7305,7 +7319,7 @@ GameObject:
   - 223: {fileID: 1808484753}
   - 114: {fileID: 1808484752}
   - 114: {fileID: 1808484751}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: CanvasVR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7552,7 +7566,7 @@ GameObject:
   - 224: {fileID: 1850385344}
   - 222: {fileID: 1850385346}
   - 114: {fileID: 1850385345}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: pnMenuInVR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8524,7 +8538,7 @@ GameObject:
   - 224: {fileID: 1970915230}
   - 222: {fileID: 1970915232}
   - 114: {fileID: 1970915231}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: imgLoading
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8954,7 +8968,7 @@ GameObject:
   - 222: {fileID: 2029006828}
   - 114: {fileID: 2029006827}
   - 114: {fileID: 2029006826}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: txtTimeLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9321,7 +9335,7 @@ GameObject:
   - 224: {fileID: 2059976102}
   - 222: {fileID: 2059976104}
   - 114: {fileID: 2059976103}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: pnIngameUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9651,7 +9665,7 @@ GameObject:
   - 224: {fileID: 2143553951}
   - 222: {fileID: 2143553953}
   - 114: {fileID: 2143553952}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: imgLoadingBG
   m_TagString: Untagged
   m_Icon: {fileID: 0}

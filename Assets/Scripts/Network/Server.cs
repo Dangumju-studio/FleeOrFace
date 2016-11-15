@@ -12,7 +12,7 @@ public class Server : MonoBehaviour {
     Socket udpServer;
     public bool isServerOpened = false;
 
-    public List<ClientInfo> clients = new List<ClientInfo>();
+    public List<ClientInfo> clientLists = new List<ClientInfo>();
     byte[] bData = new byte[1024];
 
     const int CLIENT_TIMEOUT = 15;
@@ -90,7 +90,7 @@ public class Server : MonoBehaviour {
                 // When player connected
                 case NetCommand.Connect:
                     //ignore player (clients size = 8)
-                    if (clients.Count >= 8)
+                    if (clientLists.Count >= 8)
                     {
                         dataToSend.cmd = NetCommand.Disconnect;
                         dataToSend.msg = "No more empty slots.";
@@ -102,33 +102,33 @@ public class Server : MonoBehaviour {
                     cInfo.ep = epSender;
                     cInfo.name = dataReceived.name;
                     cInfo.identification = dataReceived.identify;
-                    clients.Add(cInfo);
+                    clientLists.Add(cInfo);
                     //send every player to this player's connection state
-                    foreach (ClientInfo c in clients)
+                    foreach (ClientInfo c in clientLists)
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     break;
 
                 //When player disconnected
                 case NetCommand.Disconnect:
                     //remove player
-                    int removedIdx = clients.FindIndex(c => c.ep.Equals(epSender));
-                    clients[removedIdx].isConnected = false;
-                    clients.RemoveAt(removedIdx);
+                    int removedIdx = clientLists.FindIndex(c => c.ep.Equals(epSender));
+                    clientLists[removedIdx].isConnected = false;
+                    clientLists.RemoveAt(removedIdx);
                     //send every player to this player's connection state
-                    foreach (ClientInfo c in clients)
+                    foreach (ClientInfo c in clientLists)
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     break;
 
                 //Check player's connection state
                 case NetCommand.Check:
                     //update lastcheck time
-                    cInfo = clients.Find(c => c.ep.Equals(epSender));
+                    cInfo = clientLists.Find(c => c.ep.Equals(epSender));
                     //print("Checked: " + cInfo.name);
                     cInfo.lastCheck = DateTime.Now;
                     dataToSend.msg = "";
                     //Ready to send clients list.
                     StringBuilder sb = new StringBuilder();
-                    foreach (ClientInfo c in clients)
+                    foreach (ClientInfo c in clientLists)
                         sb.AppendFormat("{0}:{1}:{2},", c.name, c.identification, c.isReady.ToString());
                     dataToSend.msg = sb.ToString();
                     //convert data to byte
@@ -139,7 +139,7 @@ public class Server : MonoBehaviour {
                 //Chatting message
                 case NetCommand.Chat:
                     //send every player to chat message
-                    foreach (ClientInfo c in clients)
+                    foreach (ClientInfo c in clientLists)
                     {
                        //if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
@@ -151,7 +151,7 @@ public class Server : MonoBehaviour {
                     values = dataReceived.msg.Split(new char[] { ',' });
                     gameManager.mapNumber = int.Parse(values[0]);
                     gameManager.is3rdCam = bool.Parse(values[1]);
-                    foreach (ClientInfo c in clients)
+                    foreach (ClientInfo c in clientLists)
                     {
                         if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
@@ -161,34 +161,34 @@ public class Server : MonoBehaviour {
                 //Ready in lobby
                 case NetCommand.Ready:
                     //update ready state
-                    cInfo = clients.Find(c => c.ep.Equals(epSender));
+                    cInfo = clientLists.Find(c => c.ep.Equals(epSender));
                     cInfo.isReady = bool.Parse(dataReceived.msg);
                     //send every player to this player's ready state
-                    foreach (ClientInfo c in clients)
+                    foreach (ClientInfo c in clientLists)
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
 
                     //if all players are ready, Start LOADING GAME SCENE
                     cInfo = null;
-                    if (clients.Count >= 2)
+                    if (clientLists.Count >= 2)
                     {
-                        cInfo = clients.Find(c => c.isReady == false);
+                        cInfo = clientLists.Find(c => c.isReady == false);
                         if (cInfo == null)
                         {
                             dataToSend.cmd = NetCommand.LoadGame;
                             dataToSend.msg = "";
                             msg = dataToSend.ConvertToByte();
-                            foreach (ClientInfo c in clients)
+                            foreach (ClientInfo c in clientLists)
                                 udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                         }
                     }
                     break;
                 //When one's Loading done
                 case NetCommand.LoadGame:
-                    cInfo = clients.Find(c => c.ep.Equals(epSender));
+                    cInfo = clientLists.Find(c => c.ep.Equals(epSender));
                     cInfo.isLoadingDone = bool.Parse(dataReceived.msg);
                     //if all players' loading is done, START THE GAME.
                     cInfo = null;
-                    cInfo = clients.Find(c => c.isLoadingDone == false);
+                    cInfo = clientLists.Find(c => c.isLoadingDone == false);
                     if (cInfo == null)
                     {
                         gameManager.isGamePlaying = true;
@@ -196,7 +196,7 @@ public class Server : MonoBehaviour {
                         dataToSend.cmd = NetCommand.StartGame;
                         dataToSend.msg = "";
                         msg = dataToSend.ConvertToByte();
-                        foreach (ClientInfo c in clients)
+                        foreach (ClientInfo c in clientLists)
                             udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
                     break;
@@ -204,7 +204,7 @@ public class Server : MonoBehaviour {
                 //Attack
                 case NetCommand.Attack:
                     //Attack - Kill check
-                    cInfo = clients.Find(c => c.ep.Equals(epSender));
+                    cInfo = clientLists.Find(c => c.ep.Equals(epSender));
                     string attacked = "";
                     if (cInfo.userState == PlayerState.Zombie)
                     {
@@ -213,21 +213,39 @@ public class Server : MonoBehaviour {
                         if (attacked.Length > 0)
                         {
                             //Get attacked player via attacked identification string.
-                            ClientInfo cInfo2 = clients.Find(c => c.identification == attacked);
+                            ClientInfo cInfo2 = clientLists.Find(c => c.identification == attacked);
                             if (cInfo2 != null)
                             {
                                 if (cInfo2.userState == PlayerState.Human)
                                 {
                                     print(cInfo2.name + " has attacked by " + cInfo.name);
                                     cInfo2.userState = PlayerState.Dead;
+
+                                    //Is the game end?
+                                    int zombies = clientLists.FindAll(c => c.userState == PlayerState.Zombie).Count;
+                                    int humans = clientLists.FindAll(c => c.userState == PlayerState.Human).Count;
+                                    //There's only one survival => GAME OVER
+                                    if(zombies + humans <= 1 && gameManager.isGamePlaying)
+                                    {
+                                        gameManager.isGamePlaying = false;
+                                        dataToSend = new NetworkData();
+                                        dataToSend.cmd = NetCommand.Gameover;
+                                        dataToSend.identify = cInfo.identification;
+                                        msg = dataToSend.ConvertToByte();
+                                        //SEND GAMEOVER MESSAGE
+                                        foreach (ClientInfo c in clientLists)
+                                            udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                                    }
                                 }
+                                else attacked = "";
                             }
+                            else attacked = "";
                         }
                     }
                     dataToSend = new NetworkData(msg);
                     dataToSend.msg = attacked;
                     msg = dataToSend.ConvertToByte();
-                    foreach (ClientInfo c in clients)
+                    foreach (ClientInfo c in clientLists)
                     {
                         //if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
@@ -235,7 +253,7 @@ public class Server : MonoBehaviour {
                     break;
                 //Moving/Turning
                 case NetCommand.PositionRotation:
-                    cInfo = clients.Find(c => c.ep.Equals(epSender));
+                    cInfo = clientLists.Find(c => c.ep.Equals(epSender));
                     values = dataReceived.msg.Split(new char[] { ',' });
                     if (cInfo != null)
                     {
@@ -244,15 +262,11 @@ public class Server : MonoBehaviour {
                         cInfo.userIsOnGround = bool.Parse(values[7]);
                         cInfo.userIsFlashOn = bool.Parse(values[8]);
                     }
-                    foreach (ClientInfo c in clients)
+                    foreach (ClientInfo c in clientLists)
                     {
                         if (c.ep.Equals(epSender)) continue;
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                     }
-                    break;
-                //GAME OVER
-                case NetCommand.Gameover:
-
                     break;
             }
         }
@@ -290,19 +304,19 @@ public class Server : MonoBehaviour {
         {
             yield return new WaitForSeconds(5f);
             NetworkData data = new NetworkData();
-            for(int i=0; i<clients.Count; i++)
+            for(int i=0; i<clientLists.Count; i++)
             {
                 //if a client doesn't send check packet until 30(CLIENT_TIMEOUT) seconds from last check time, 
                 //judge by that client is disconnected from server.
-                if ((DateTime.Now - clients[i].lastCheck).Seconds > CLIENT_TIMEOUT)
+                if ((DateTime.Now - clientLists[i].lastCheck).Seconds > CLIENT_TIMEOUT)
                 {
-                    data.name = clients[i].name;
-                    data.identify = clients[i].identification;
+                    data.name = clientLists[i].name;
+                    data.identify = clientLists[i].identification;
                     data.cmd = NetCommand.Disconnect;
                     data.msg = "";
-                    clients.RemoveAt(i--);
+                    clientLists.RemoveAt(i--);
                     byte[] msg = data.ConvertToByte();
-                    foreach (ClientInfo c in clients)
+                    foreach (ClientInfo c in clientLists)
                         udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
                 }
             }
@@ -320,7 +334,7 @@ public class Server : MonoBehaviour {
         newMessage.cmd = cmd;
         newMessage.msg = msg;
         byte[] bData = newMessage.ConvertToByte();
-        foreach (ClientInfo c in clients)
+        foreach (ClientInfo c in clientLists)
             udpServer.BeginSendTo(bData, 0, bData.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), null);
     }
 }

@@ -74,7 +74,10 @@ public class GameController : MonoBehaviour {
     //Game start?
     bool isGameStart = false;
 
-    //is Pause?
+    //Game end?
+    bool isGameOver = false;
+
+    //is Paused?
     public bool isPause = false;
 
     // Use this for initialization
@@ -136,7 +139,7 @@ public class GameController : MonoBehaviour {
 
         //Load other players
         if(!DEBUGGING_MODE)
-            foreach (ClientInfo ci in client.clients)
+            foreach (ClientInfo ci in client.clientLists)
             {
                 if (ci.name == client.playerName) continue;
                 GameObject newPlayer = Instantiate(playerCharPrefab);
@@ -268,7 +271,8 @@ public class GameController : MonoBehaviour {
     //FixedUpdate
     void FixedUpdate()
     {
-        if(!DEBUGGING_MODE)
+        if (!DEBUGGING_MODE)
+        {
             if (client.isGamePlaying)
             {
                 //Start Game!!
@@ -281,15 +285,24 @@ public class GameController : MonoBehaviour {
                     m_fpsCtrl.gameObject.GetComponent<Rigidbody>().useGravity = true;
                     m_fpsCtrl.transform.position = new Vector3(m_fpsCtrl.transform.position.x, 10, m_fpsCtrl.transform.position.z);
                     //role rotation timer start!!
-                    StartCoroutine(gameManager.RotatePlayerRoleTimer());
+                    StartCoroutine(gameManager.ReceiveRotatePlayerRoleTimer());
                     print("Game start");
                 }
 
                 //Send player's control
                 if (client != null) client.SendPlayerControl();
-                
+
                 //Get informations from client instance -> processed in "OtherCharacter" class component of each players' gameobject.
             }
+
+            //gameover?
+            if(client.isGameOver)
+                if(!isGameOver)
+                {
+                    isGameOver = true;
+                    StartCoroutine(GameOver());
+                }
+        }
     }
 
     #region ESC Menu buttons
@@ -337,15 +350,12 @@ public class GameController : MonoBehaviour {
     {
         if (!hasFocus)
         {
-            if (!isPause)
-            {
-                isPause = true;
-                m_fpsCtrl.m_isPause = isPause;
-                m_pnESCMenu.SetActive(true);
-                m_pnBackToMain.SetActive(false);
-                m_pnExitToDesktop.SetActive(false);
-                Cursor.visible = true;
-            }
+            isPause = true;
+            m_fpsCtrl.m_isPause = isPause;
+            m_pnESCMenu.SetActive(true);
+            m_pnBackToMain.SetActive(false);
+            m_pnExitToDesktop.SetActive(false);
+            Cursor.visible = true;
         }
     }
 
@@ -380,6 +390,10 @@ public class GameController : MonoBehaviour {
                 break;
         }
     }
+    /// <summary>
+    /// Thunder sound playing coroutine
+    /// </summary>
+    /// <returns></returns>
     IEnumerator SwitchPlayerThunder()
     {
         if (isGameStart)
@@ -398,5 +412,39 @@ public class GameController : MonoBehaviour {
             }
             light.intensity = 0.8f;
         }
+    }
+
+    /// <summary>
+    /// Game over coroutine
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator GameOver()
+    {
+        string winner;
+        try
+        {
+            winner = client.clientLists.Find(c => c.identification == client.strWinner).name;
+        } catch
+        {
+            winner = "[UNKNOWN]";
+        }
+
+        txtWinner.text += winner;
+        txtVRWinner.text += winner;
+        if (client.strWinner == client.identification)
+        {
+            txtWinner.text += "(YOU)";
+            txtVRWinner.text += "(YOU)";
+        }
+        m_pnGameOver.SetActive(true);
+        m_pnVRGameOver.SetActive(true);
+        yield return new WaitForSeconds(3f);
+        isGameStart = false;
+        isGameOver = false;
+        client.isGameOver = false;
+        client.isGamePlaying = false;
+        client.isLoadingStarting = false;
+        client.strWinner = "";
+        UnityEngine.SceneManagement.SceneManager.LoadScene("room");
     }
 }

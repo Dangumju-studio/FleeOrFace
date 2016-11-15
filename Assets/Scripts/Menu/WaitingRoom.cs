@@ -78,7 +78,7 @@ public class WaitingRoom : MonoBehaviour {
 
         //update player list ref client list
         //Add player into playerlist
-        foreach(ClientInfo ci in client.clients)
+        foreach(ClientInfo ci in client.clientLists)
         {
             if (ci.name == client.playerName && ci.identification == client.identification) continue;
             PlayerInfo pi = playerInfoList.Find(p => p.identification.Equals(ci.identification));
@@ -94,7 +94,7 @@ public class WaitingRoom : MonoBehaviour {
         //Remove player or Modify player status from playerlist
         for(int i=0; i<playerInfoList.Count; i++)
         {
-            ClientInfo ci = client.clients.Find(c => c.identification.Equals(playerInfoList[i].identification));
+            ClientInfo ci = client.clientLists.Find(c => c.identification.Equals(playerInfoList[i].identification));
             //remove
             if(ci == null)
             {

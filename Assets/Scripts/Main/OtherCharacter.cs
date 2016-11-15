@@ -49,7 +49,7 @@ public class OtherCharacter : MonoBehaviour {
         //Get client
         client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
         m_animator = zombie.GetComponent<Animator>();
-        clientInfo = client.clients.Find(cc => cc.identification.Equals(playerIdentification));
+        clientInfo = client.clientLists.Find(cc => cc.identification.Equals(playerIdentification));
 
         //disable ragdall
         foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
