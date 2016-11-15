@@ -7793,6 +7793,7 @@ GameObject:
   - 114: {fileID: 1868779870}
   - 54: {fileID: 1868779869}
   - 82: {fileID: 1868779868}
+  - 114: {fileID: 1868779873}
   m_Layer: 0
   m_Name: FPSController
   m_TagString: Player
@@ -8033,6 +8034,19 @@ Transform:
   - {fileID: 66597609}
   m_Father: {fileID: 0}
   m_RootOrder: 0
+--- !u!114 &1868779873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1868779867}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 279f5258579a64e4c9499a0f7b394e9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 50
+  rotSpeed: 10
 --- !u!1 &1874413455
 GameObject:
   m_ObjectHideFlags: 0

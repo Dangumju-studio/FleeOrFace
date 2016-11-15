@@ -103,4 +103,18 @@ public class ClientInfo
         userIsAttack = false;
         userState = PlayerState.None;
     }
+
+    public static ClientInfo findClientInfo(ref System.Collections.Generic.List<ClientInfo> list, System.Net.EndPoint ep)
+    {
+        foreach (ClientInfo c in list)
+            if (c.ep.Equals(ep)) return c;
+        return null;
+    }
+    public static ClientInfo findClientInfo(ref System.Collections.Generic.List<ClientInfo> list, string identification)
+    {
+        foreach (ClientInfo c in list)
+            if (c.identification == identification) return c;
+        return null;
+    }
+
 }

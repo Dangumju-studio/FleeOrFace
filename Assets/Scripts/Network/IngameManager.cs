@@ -49,11 +49,11 @@ public class IngameManager : MonoBehaviour {
     /// <summary>
     /// Attack range.
     /// </summary>
-    private readonly float ATTACK_RANGE = 1.3f;
+    private readonly float ATTACK_RANGE = 1.5f;
     /// <summary>
     /// Attack angle range
     /// </summary>
-    private readonly float ATTACK_ANGLE_RANGE = 10;
+    private readonly float ATTACK_ANGLE_RANGE = 20;
 
     void Start()
     {
@@ -89,9 +89,10 @@ public class IngameManager : MonoBehaviour {
     {
         print("role distribute start");
         if (!server.isServerOpened) return;
-        int half = server.clientLists.Count / 2;
+        int half = server.clientLists.FindAll(c => c.userState != PlayerState.Dead).Count / 2;
         for (int i = 0; i < server.clientLists.Count; i++)
         {
+            if (server.clientLists[i].userState == PlayerState.Dead) continue;
             if (i < half) server.clientLists[i].userState = PlayerState.Human;
             else server.clientLists[i].userState = PlayerState.Zombie;
         }
@@ -103,6 +104,7 @@ public class IngameManager : MonoBehaviour {
             n--;
             int k = rnd.Next(n + 1);
             int ps = (int)server.clientLists[k].userState;
+            if (server.clientLists[k].userState == PlayerState.Dead || server.clientLists[n].userState == PlayerState.Dead) continue;
             server.clientLists[k].userState = (PlayerState)((int)server.clientLists[n].userState);
             server.clientLists[n].userState = (PlayerState)ps;
         }
@@ -148,9 +150,6 @@ public class IngameManager : MonoBehaviour {
         foreach(ClientInfo c in server.clientLists)
         {
             if (c.identification == attacker.identification) continue;
-            print(c.userPosition);
-            print(attacker.userPosition);
-            print((c.userPosition - attacker.userPosition).sqrMagnitude);
             if((c.userPosition - attacker.userPosition).sqrMagnitude < ATTACK_RANGE)
             {
                 if(Vector3.Angle(attacker.userRotation * Vector3.forward, c.userPosition - attacker.userPosition) < ATTACK_ANGLE_RANGE)

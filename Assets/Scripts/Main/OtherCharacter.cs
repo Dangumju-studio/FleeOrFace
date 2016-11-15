@@ -49,9 +49,9 @@ public class OtherCharacter : MonoBehaviour {
         //Get client
         client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
         m_animator = zombie.GetComponent<Animator>();
-        clientInfo = client.clientLists.Find(cc => cc.identification.Equals(playerIdentification));
+        clientInfo = ClientInfo.findClientInfo(ref client.clientLists, playerIdentification);
 
-        //disable ragdall
+        //disable ragdoll
         foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
             rb.isKinematic = true;
         foreach (Collider cd in GetComponentsInChildren<Collider>())
@@ -59,6 +59,7 @@ public class OtherCharacter : MonoBehaviour {
 
         //Player name
         txtName.text = playerName;
+        print("Created: " + playerName + " - " + clientInfo.userState);
 
         //AudioSource
         audioSource = GetComponent<AudioSource>();
@@ -106,7 +107,7 @@ public class OtherCharacter : MonoBehaviour {
                             cd.enabled = true;
                         return;
                     case PlayerState.None:
-                        Destroy(gameObject);
+                        //Destroy(gameObject);
                         return;
                 }
             }

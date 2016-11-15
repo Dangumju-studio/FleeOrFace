@@ -4525,7 +4525,7 @@ MonoBehaviour:
   audioLand: {fileID: 8300000, guid: 3b09d59f4499d45428baa7a21e954296, type: 3}
   audioFlash: {fileID: 8300000, guid: 7694d9fb8e53093499cc0b5f7997cad6, type: 3}
   audioWaterIn: {fileID: 8300000, guid: 9a139b33c3be1fc40bd8118cdd3c980e, type: 3}
-  audioWaterOut: {fileID: 8300000, guid: 9a139b33c3be1fc40bd8118cdd3c980e, type: 3}
+  audioWaterOut: {fileID: 8300000, guid: ea53e81e411ec924cbcee6ae5491e703, type: 3}
   audioAttack: {fileID: 8300000, guid: a687e42c92d88544787de9aec813b7bd, type: 3}
 --- !u!135 &135000010493160902
 SphereCollider:

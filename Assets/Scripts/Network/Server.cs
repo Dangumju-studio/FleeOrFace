@@ -123,7 +123,7 @@ public class Server : MonoBehaviour {
                 //Check player's connection state
                 case NetCommand.Check:
                     //update lastcheck time
-                    cInfo = clientLists.Find(c => c.ep.Equals(epSender));
+                    cInfo = ClientInfo.findClientInfo(ref clientLists, epSender);
                     //print("Checked: " + cInfo.name);
                     cInfo.lastCheck = DateTime.Now;
                     dataToSend.msg = "";
@@ -162,7 +162,7 @@ public class Server : MonoBehaviour {
                 //Ready in lobby
                 case NetCommand.Ready:
                     //update ready state
-                    cInfo = clientLists.Find(c => c.ep.Equals(epSender));
+                    cInfo = ClientInfo.findClientInfo(ref clientLists, epSender);
                     cInfo.isReady = bool.Parse(dataReceived.msg);
                     //send every player to this player's ready state
                     foreach (ClientInfo c in clientLists)
@@ -185,7 +185,7 @@ public class Server : MonoBehaviour {
                     break;
                 //When one's Loading done
                 case NetCommand.LoadGame:
-                    cInfo = clientLists.Find(c => c.ep.Equals(epSender));
+                    cInfo = ClientInfo.findClientInfo(ref clientLists, epSender);
                     cInfo.isLoadingDone = bool.Parse(dataReceived.msg);
                     //if all players' loading is done, START THE GAME.
                     cInfo = null;
@@ -205,7 +205,7 @@ public class Server : MonoBehaviour {
                 //Attack
                 case NetCommand.Attack:
                     //Attack - Kill check
-                    cInfo = clientLists.Find(c => c.ep.Equals(epSender));
+                    cInfo = ClientInfo.findClientInfo(ref clientLists, epSender);
                     string attacked = "";
                     if (cInfo.userState == PlayerState.Zombie)
                     {
@@ -214,7 +214,7 @@ public class Server : MonoBehaviour {
                         if (attacked.Length > 0)
                         {
                             //Get attacked player via attacked identification string.
-                            ClientInfo cInfo2 = clientLists.Find(c => c.identification == attacked);
+                            ClientInfo cInfo2 = ClientInfo.findClientInfo(ref clientLists, attacked);
                             if (cInfo2 != null)
                             {
                                 if (cInfo2.userState == PlayerState.Human)
@@ -222,6 +222,7 @@ public class Server : MonoBehaviour {
                                     print(cInfo2.name + " has attacked by " + cInfo.name);
                                     cInfo2.userState = PlayerState.Dead;
 
+                                    //########################### GAMEOVER CHECK ###################
                                     //Is the game end?
                                     int zombies = clientLists.FindAll(c => c.userState == PlayerState.Zombie).Count;
                                     int humans = clientLists.FindAll(c => c.userState == PlayerState.Human).Count;
@@ -231,12 +232,19 @@ public class Server : MonoBehaviour {
                                         gameManager.isGamePlaying = false;
                                         dataToSend = new NetworkData();
                                         dataToSend.cmd = NetCommand.Gameover;
-                                        dataToSend.identify = cInfo.identification;
-                                        msg = dataToSend.ConvertToByte();
+                                        dataToSend.identify = cInfo.identification; //the winner
+                                        byte[] endmsg = dataToSend.ConvertToByte();
                                         //SEND GAMEOVER MESSAGE
+                                        //################ GAME OVER ########################
                                         foreach (ClientInfo c in clientLists)
-                                            udpServer.BeginSendTo(msg, 0, msg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                                        {
+                                            //Reset every clientinfo
+                                            c.isReady = false;
+                                            c.isLoadingDone = false;
+                                            udpServer.BeginSendTo(endmsg, 0, endmsg.Length, SocketFlags.None, c.ep, new AsyncCallback(OnSend), c.ep);
+                                        }
                                     }
+                                    //########################### END GAMEOVER CHECK ####################
                                 }
                                 else attacked = "";
                             }
@@ -254,7 +262,7 @@ public class Server : MonoBehaviour {
                     break;
                 //Moving/Turning
                 case NetCommand.PositionRotation:
-                    cInfo = clientLists.Find(c => c.ep.Equals(epSender));
+                    cInfo = ClientInfo.findClientInfo(ref clientLists, epSender);
                     values = dataReceived.msg.Split(new char[] { ',' });
                     if (cInfo != null)
                     {

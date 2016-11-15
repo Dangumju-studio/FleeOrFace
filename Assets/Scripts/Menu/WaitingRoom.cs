@@ -46,7 +46,8 @@ public class WaitingRoom : MonoBehaviour {
         playerInfoList = new List<PlayerInfo>();
         myPlayerName.text = client.playerName;
 
-        client.ConnectToServer(client.hostIP);
+        if(!client.isConnected)
+            client.ConnectToServer(client.hostIP);
         
         //load room
         StartCoroutine(DelayLoadRoom());

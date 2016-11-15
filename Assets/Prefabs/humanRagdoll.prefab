@@ -599,6 +599,7 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 4000013380120648}
+  - 54: {fileID: 54000013832845436}
   m_Layer: 0
   m_Name: humanRagdoll
   m_TagString: Untagged
@@ -2125,6 +2126,21 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!54 &54000013832845436
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000012225850676}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!54 &54000013998722218
 Rigidbody:
   m_ObjectHideFlags: 1
@@ -2619,11 +2635,11 @@ CharacterJoint:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000011894770594}
-  m_ConnectedBody: {fileID: 0}
+  m_ConnectedBody: {fileID: 54000013832845436}
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: -1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.07056052, y: 0.9419483, z: -0.0007417953}
+  m_ConnectedAnchor: {x: 0.0039200294, y: 0.052330464, z: -0.000041210853}
   serializedVersion: 2
   m_SwingAxis: {x: 0, y: 0, z: 1}
   m_TwistLimitSpring:
@@ -2703,11 +2719,11 @@ CharacterJoint:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000010252784092}
-  m_ConnectedBody: {fileID: 0}
+  m_ConnectedBody: {fileID: 54000013832845436}
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.000009085285, y: 1.1774507, z: -0.0034745168}
+  m_ConnectedAnchor: {x: -0.00000050473807, y: 0.06541393, z: -0.00019302873}
   serializedVersion: 2
   m_SwingAxis: {x: 0, y: 0, z: 1}
   m_TwistLimitSpring:
@@ -2745,11 +2761,11 @@ CharacterJoint:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000010048181348}
-  m_ConnectedBody: {fileID: 0}
+  m_ConnectedBody: {fileID: 54000013832845436}
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: -1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.07056058, y: 0.94193876, z: 0.001801766}
+  m_ConnectedAnchor: {x: -0.0039200326, y: 0.052329935, z: 0.00010009812}
   serializedVersion: 2
   m_SwingAxis: {x: 0, y: 0, z: 1}
   m_TwistLimitSpring:

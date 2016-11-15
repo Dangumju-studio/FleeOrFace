@@ -156,7 +156,7 @@ public class Client : MonoBehaviour {
                     foreach (string s in players)
                     {
                         string[] pStr = s.Split(new char[] { ':' });
-                        ClientInfo ci = clientLists.Find(c => c.identification.Equals(pStr[1]));
+                        ClientInfo ci = ClientInfo.findClientInfo(ref clientLists,pStr[1]);
                         if (ci != null)
                         {
                             //modify
@@ -193,7 +193,7 @@ public class Client : MonoBehaviour {
                     break;
 
                 case NetCommand.Ready:
-                    cInfo = clientLists.Find(c => c.identification == msgReceived.identify);
+                    cInfo = ClientInfo.findClientInfo(ref clientLists, msgReceived.identify);
                     if (cInfo != null) cInfo.isReady = bool.Parse(msgReceived.msg);
                     break;
                 case NetCommand.LoadGame:
@@ -205,7 +205,7 @@ public class Client : MonoBehaviour {
                     break;
 
                 case NetCommand.PositionRotation:
-                    cInfo = clientLists.Find(c => c.identification == msgReceived.identify);
+                    cInfo = ClientInfo.findClientInfo(ref clientLists, msgReceived.identify);
                     values = msgReceived.msg.Split(new char[] { ',' });
                     if (cInfo != null)
                     {
@@ -218,7 +218,7 @@ public class Client : MonoBehaviour {
 
                 case NetCommand.Attack:
                     //Set attacker's attack state
-                    cInfo = clientLists.Find(c => c.identification == msgReceived.identify);
+                    cInfo = ClientInfo.findClientInfo(ref clientLists, msgReceived.identify);
                     if (cInfo != null)
                         if (cInfo.identification != identification)
                             cInfo.userIsAttack = true;
@@ -231,7 +231,7 @@ public class Client : MonoBehaviour {
                         }
                         else
                         {
-                            cInfo = clientLists.Find(c => c.identification == msgReceived.msg);
+                            cInfo = ClientInfo.findClientInfo(ref clientLists, msgReceived.msg);
                             if (cInfo != null) cInfo.userState = PlayerState.Dead;
                         }
                     break;
@@ -246,7 +246,7 @@ public class Client : MonoBehaviour {
                     {
                         string cur_identification = s.Substring(0, s.IndexOf(':'));
                         int role = int.Parse(s.Substring(s.IndexOf(':') + 1, s.Length - s.IndexOf(':')-1));
-                        cInfo = clientLists.Find(c => c.identification == cur_identification);
+                        cInfo = ClientInfo.findClientInfo(ref clientLists, cur_identification);
                         if (cInfo != null)
                             cInfo.userState = (PlayerState)role;
                         if (cur_identification == identification)

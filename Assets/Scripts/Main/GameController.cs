@@ -137,22 +137,11 @@ public class GameController : MonoBehaviour {
         else
             StartCoroutine(LoadGameScene(gameManager.mapList[gameManager.mapNumber]));
 
-        //Load other players
-        if(!DEBUGGING_MODE)
-            foreach (ClientInfo ci in client.clientLists)
-            {
-                if (ci.name == client.playerName) continue;
-                GameObject newPlayer = Instantiate(playerCharPrefab);
-                OtherCharacter oc = newPlayer.GetComponent<OtherCharacter>();
-                oc.playerName = ci.name;
-                oc.playerIdentification = ci.identification;
-            }
-
         //Randomly located
         float x = Random.Range(5, 195);
         float y = 20;
         float z = Random.Range(5, 195);
-        m_fpsCtrl.gameObject.transform.position = new Vector3(x, y, z);
+        //m_fpsCtrl.gameObject.transform.position = new Vector3(x, y, z);
 
         SwitchPlayerCharacter();
     }
@@ -179,7 +168,7 @@ public class GameController : MonoBehaviour {
         yield return new WaitForSeconds(1f);
 
         //Send 'Loading done' message to server
-        if(DEBUGGING_MODE)
+        if (DEBUGGING_MODE)
         {
             isGameStart = true;
             m_pnLoadingBG.SetActive(false);
@@ -191,7 +180,19 @@ public class GameController : MonoBehaviour {
             m_fpsCtrl.transform.position = new Vector3(m_fpsCtrl.transform.position.x, 10, m_fpsCtrl.transform.position.z);
             print("Game start");
         }
-        else client.SendData(NetCommand.LoadGame, "True");
+        else
+        {        
+            //Load other players
+            foreach (ClientInfo ci in client.clientLists)
+            {
+                if (ci.identification == client.identification) continue;
+                GameObject newPlayer = Instantiate(playerCharPrefab);
+                OtherCharacter oc = newPlayer.GetComponent<OtherCharacter>();
+                oc.playerName = ci.name;
+                oc.playerIdentification = ci.identification;
+            }
+            client.SendData(NetCommand.LoadGame, "True");
+        }
     }
 
     /// <summary>
@@ -215,19 +216,29 @@ public class GameController : MonoBehaviour {
         if(client != null) client.positionRotation = sbPosRot.ToString();
 
         //Update role rotation time, player's role
-        if(client != null) { 
-            txtRotateLeftTime.text = client.rotateTimeLeft.ToString();
-            txtVRRotateLeftTime.text = client.rotateTimeLeft.ToString();
+        if(client != null) {
+            int rotateTime = client.rotateTimeLeft;
+            txtRotateLeftTime.text = Mathf.Clamp(client.rotateTimeLeft, 0, 100).ToString();
+            txtVRRotateLeftTime.text = Mathf.Clamp(client.rotateTimeLeft, 0, 100).ToString();
+            if (rotateTime < 0) SwitchPlayerCharacter();
+
             if (client.userState != playerState)
             {
                 playerState = client.userState;
+                //################################### ON DEATH #####################################
                 if(playerState == PlayerState.Dead)
                 {
                     //put ragdoll.
                     GameObject ragdoll = Instantiate(playerRagdollObj, m_fpsCtrl.gameObject.transform.position, m_fpsCtrl.gameObject.transform.rotation) as GameObject;
+                    //remove player object
+                    zombieFPSObj.SetActive(false);
+                    zombieObj.SetActive(false);
+                    humanFPSObj.SetActive(false);
+                    humanObj.SetActive(false);
+                    m_fpsCtrl.gameObject.GetComponent<DeathCamController>().enabled = true;
+                    m_fpsCtrl.enabled = false;
+
                 }
-                else 
-                    SwitchPlayerCharacter();
             }
         }
 
@@ -296,7 +307,9 @@ public class GameController : MonoBehaviour {
                 }
 
                 //Send player's control
-                if (client != null) client.SendPlayerControl();
+                if (client != null)
+                    if(client.userState != PlayerState.Dead)
+                        client.SendPlayerControl();
 
                 //Get informations from client instance -> processed in "OtherCharacter" class component of each players' gameobject.
             }
@@ -354,7 +367,7 @@ public class GameController : MonoBehaviour {
 
     void OnApplicationFocus(bool hasFocus)
     {
-        if (!hasFocus)
+        if (!hasFocus && isGameStart)
         {
             isPause = true;
             m_fpsCtrl.m_isPause = isPause;
@@ -430,7 +443,8 @@ public class GameController : MonoBehaviour {
         try
         {
             winner = client.clientLists.Find(c => c.identification == client.strWinner).name;
-        } catch
+        }
+        catch
         {
             winner = "[UNKNOWN]";
         }
@@ -451,6 +465,6 @@ public class GameController : MonoBehaviour {
         client.isGamePlaying = false;
         client.isLoadingStarting = false;
         client.strWinner = "";
-        UnityEngine.SceneManagement.SceneManager.LoadScene("room");
+        //UnityEngine.SceneManagement.SceneManager.LoadScene("room");
     }
 }
