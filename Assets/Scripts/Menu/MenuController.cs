@@ -10,6 +10,7 @@ public class MenuController : MonoBehaviour {
 
     [SerializeField] GameObject pnSelectHostMode;
     [SerializeField] GameObject pnTypeHostIP;
+    [SerializeField] GameObject pnHelp;
     [SerializeField] Text txtHostIP;
     Client client;
     Server server;
@@ -84,6 +85,11 @@ public class MenuController : MonoBehaviour {
     public void btnExit()
     {
         Application.Quit();
+    }
+
+    public void pnHelpToggle(bool on)
+    {
+        pnHelp.SetActive(on);
     }
     
 }
