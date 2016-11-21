@@ -62,6 +62,9 @@ public class Server : MonoBehaviour {
         udpServer.Dispose();
         udpServer = null;
         isServerOpened = false;
+
+        //empty clientlist
+        clientLists.Clear();
     }
 
     /// <summary>

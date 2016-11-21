@@ -301,6 +301,7 @@ public class Client : MonoBehaviour
     /// </summary>
     public void Disconnect()
     {
+        //Send disconnect message
         NetworkData msgToSend = new NetworkData();
         msgToSend.cmd = NetCommand.Disconnect;
         msgToSend.name = playerName;
@@ -309,6 +310,9 @@ public class Client : MonoBehaviour
         byte[] bData = msgToSend.ConvertToByte();
         client.SendTo(bData, 0, bData.Length, SocketFlags.None, epServer);
         client.Close();
+
+        //empty clientlist
+        clientLists.Clear();
     }
 
     /// <summary>
@@ -317,13 +321,20 @@ public class Client : MonoBehaviour
     /// <param name="msg"></param>
     public void SendData(NetCommand cmd, string msg)
     {
-        NetworkData newMessage = new NetworkData();
-        newMessage.name = playerName;
-        newMessage.identify = identification;
-        newMessage.cmd = cmd;
-        newMessage.msg = msg;
-        byte[] bData = newMessage.ConvertToByte();
-        client.BeginSendTo(bData, 0, bData.Length, SocketFlags.None, epServer, new AsyncCallback(OnSend), null);
+        try
+        {
+            NetworkData newMessage = new NetworkData();
+            newMessage.name = playerName;
+            newMessage.identify = identification;
+            newMessage.cmd = cmd;
+            newMessage.msg = msg;
+            byte[] bData = newMessage.ConvertToByte();
+            client.BeginSendTo(bData, 0, bData.Length, SocketFlags.None, epServer, new AsyncCallback(OnSend), null);
+        }
+        catch(Exception ex)
+        {
+            print(ex.Message);
+        }
     }
 
     /// <summary>

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Text;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityEngine.UI;
+using System;
 
 public class GameController : MonoBehaviour {
 
@@ -47,6 +48,7 @@ public class GameController : MonoBehaviour {
     #endregion
 
     Client client;
+    Server server;
     IngameManager gameManager;
     public PlayerState playerState;
 
@@ -96,6 +98,7 @@ public class GameController : MonoBehaviour {
         if (!DEBUGGING_MODE)
         {
             client = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Client>();
+            server = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<Server>();
             client.userState = PlayerState.None;
             gameManager = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<IngameManager>();
             isThirdPersonCamera = gameManager.is3rdCam;
@@ -139,9 +142,9 @@ public class GameController : MonoBehaviour {
             StartCoroutine(LoadGameScene(gameManager.mapList[gameManager.mapNumber]));
 
         //Randomly located
-        float x = Random.Range(10, 90);
+        float x = UnityEngine.Random.Range(10, 90);
         float y = 20;
-        float z = Random.Range(10, 90);
+        float z = UnityEngine.Random.Range(10, 90);
         m_fpsCtrl.gameObject.transform.position = new Vector3(x, y, z);
     }
     /// <summary>
@@ -208,8 +211,8 @@ public class GameController : MonoBehaviour {
         Transform playerT = m_fpsCtrl.gameObject.transform;
         if(playerState != PlayerState.Dead)
             sbPosRot.AppendFormat("{0},{1},{2},{3},{4},{5},{6},{7},{8}",    //Position(x, y, z), Rotation(x, y, z, w -> Quaternion), OnGround, Flash
-                playerT.position.x, playerT.position.y, playerT.position.z,
-                playerT.rotation.x, playerT.rotation.y, playerT.rotation.z, playerT.rotation.w,
+                Math.Round(playerT.position.x,2), Math.Round(playerT.position.y,2), Math.Round(playerT.position.z,2),
+                Math.Round(playerT.rotation.x,1), Math.Round(playerT.rotation.y,1), Math.Round(playerT.rotation.z,1), Math.Round(playerT.rotation.w,2),
                 m_fpsCtrl.m_Animator.GetBool("OnGround"), isFlashOn);
 
         //Push position and rotation value
@@ -367,11 +370,15 @@ public class GameController : MonoBehaviour {
         client.isConnected = false;
         client.isGamePlaying = false;
         client.isLoadingStarting = false;
+        client.Disconnect();
+        server.CloseServer();
         UnityEngine.SceneManagement.SceneManager.LoadScene("menu");
     }
     public void btnExitToDesktopYes_Clicked()
     {
         client.SendData(NetCommand.Disconnect, "");
+        client.Disconnect();
+        server.CloseServer();
         Application.Quit();
     }
     public void btnCancel_Clicked()

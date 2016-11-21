@@ -23,11 +23,6 @@ public class MenuController : MonoBehaviour {
 
         Application.runInBackground = true;
     }
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 
     //Type name & Generate identification string randomly
     public void btnName() {
@@ -62,10 +57,6 @@ public class MenuController : MonoBehaviour {
     {
         pnSelectHostMode.SetActive(false);
         pnTypeHostIP.SetActive(true);
-    }
-    public void btnHelp()
-    {
-       
     }
 
     //Type IP

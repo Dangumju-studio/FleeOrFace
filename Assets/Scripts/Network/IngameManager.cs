@@ -49,7 +49,7 @@ public class IngameManager : MonoBehaviour {
     /// <summary>
     /// Attack range.
     /// </summary>
-    private readonly float ATTACK_RANGE = 3f;
+    private readonly float ATTACK_RANGE = 3.5f;
     /// <summary>
     /// Attack angle range
     /// </summary>
@@ -104,8 +104,9 @@ public class IngameManager : MonoBehaviour {
         while (n > 1)
         {
             n--;
-            int k = rnd.Next(n + 1);
+            int k = rnd.Next(survivor.Count);
             int ps = (int)survivor[k].userState;
+            if (n == k) continue;
             //if (survivor[k].userState == PlayerState.Dead || survivor[n].userState == PlayerState.Dead) continue;
             survivor[k].userState = (PlayerState)((int)survivor[n].userState);
             survivor[n].userState = (PlayerState)ps;
@@ -152,6 +153,8 @@ public class IngameManager : MonoBehaviour {
         foreach(ClientInfo c in server.clientLists)
         {
             if (c.identification == attacker.identification) continue;
+            print((c.userPosition - attacker.userPosition).sqrMagnitude);
+            print(Vector3.Angle(attacker.userRotation * Vector3.forward, c.userPosition - attacker.userPosition));
             if((c.userPosition - attacker.userPosition).sqrMagnitude < ATTACK_RANGE)
             {
                 if(Vector3.Angle(attacker.userRotation * Vector3.forward, c.userPosition - attacker.userPosition) < ATTACK_ANGLE_RANGE)
